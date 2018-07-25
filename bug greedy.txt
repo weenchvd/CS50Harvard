@@ -42,3 +42,21 @@ How much change is owed?
 964
 
 Process finished with exit code 0
+
+
+
+
+C:\_Code\C\CLionProjects\CS50Harvard\cmake-build-debug\CS50Harvard.exe
+How much change is owed?
+21.14
+21.14
+21.139999
+2114.999939
+2114
+sizeof(M) = 4
+sizeof(M2) = 8
+sizeof(C) = 4
+INT_MIN = -2147483648
+INT_MAX = 2147483647
+
+Process finished with exit code 0
