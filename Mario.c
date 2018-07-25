@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <cs50.h>
+#include "Libs/libcs50-8.1.0/cs50.h"
 
 
 void main()
@@ -11,10 +11,7 @@ void main()
        H = get_int();
     } while(H < 0 || H > 23);
     printf("------------------------------\n");
-    if(H == 0)
-    {
-        printf(" \n");
-    }
+    if(H == 0) printf(" \n");
     else
     {
         for(int y = H; y > 0; y--) // y = H - высота лестницы; цикл уменьшает количество строк в лестнице
