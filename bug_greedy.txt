@@ -1,17 +1,5 @@
 C:\_Code\C\CLionProjects\CS50Harvard\cmake-build-debug\CS50Harvard.exe
 How much change is owed?
-9.65
-9.65
-9.650000
-964
-
-Process finished with exit code 0
-
-
-
-
-C:\_Code\C\CLionProjects\CS50Harvard\cmake-build-debug\CS50Harvard.exe
-How much change is owed?
 24.56
 24.56
 24.559999
@@ -41,7 +29,7 @@ How much change is owed?
 964.999939
 964
 
-Process finished with exit code 0
+Process finished with exit code 0           //w/o "+ 0.002"
 
 
 
