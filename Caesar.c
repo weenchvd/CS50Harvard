@@ -30,8 +30,7 @@ void GetEncUppLetter(char Letter)
     int NumLetter = (int) Letter;
     NumLetter += KeyLenth;
     if(NumLetter > 90) NumLetter = (NumLetter % 90) + 64;
-    char EncUppLetter = (char) NumLetter;
-    printf("%c", EncUppLetter);
+    printf("%c", NumLetter);
 }
 
 void GetEncLowLetter(char Letter)
@@ -39,6 +38,7 @@ void GetEncLowLetter(char Letter)
     int NumLetter = (int) Letter;
     NumLetter += KeyLenth;
     if(NumLetter > 122) NumLetter = (NumLetter % 122) + 96;
-    char EncUppLetter = (char) NumLetter;
-    printf("%c", EncUppLetter);
+    printf("%c", NumLetter);
 }
+/* Даже если результат имеет тип int (int NumLetter), оператор printf использует плейсхолдер %с для символов.
+ * Таким образом, программа печатает символ, связанный с целочисленным результатом */
