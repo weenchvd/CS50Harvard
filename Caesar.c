@@ -7,7 +7,6 @@ void GetEncUppLetter(char Letter);
 void GetEncLowLetter(char Letter);
 
 int KeyLenth;
-char Letter;
 
 int main(int argc, string argv[])
 {
@@ -29,8 +28,8 @@ int main(int argc, string argv[])
 void GetEncUppLetter(char Letter)
 {
     int NumLetter = (int) Letter;
-    NumLetter = KeyLenth + 65;
-    if(NumLetter > 90) NumLetter = (NumLetter % 90) + 65;
+    NumLetter += KeyLenth;
+    if(NumLetter > 90) NumLetter = (NumLetter % 90) + 64;
     char EncUppLetter = (char) NumLetter;
     printf("%c", EncUppLetter);
 }
@@ -38,8 +37,8 @@ void GetEncUppLetter(char Letter)
 void GetEncLowLetter(char Letter)
 {
     int NumLetter = (int) Letter;
-    NumLetter = KeyLenth + 97;
-    if(NumLetter > 122) NumLetter = (NumLetter % 122) + 97;
+    NumLetter += KeyLenth;
+    if(NumLetter > 122) NumLetter = (NumLetter % 122) + 96;
     char EncUppLetter = (char) NumLetter;
     printf("%c", EncUppLetter);
 }
