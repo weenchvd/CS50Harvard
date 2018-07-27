@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "Libs/libcs50-8.1.0/cs50.h"
+#include <libcs50-8.1.0/cs50.h>
 
 void GetEncUppLetter(char Letter);
 void GetEncLowLetter(char Letter);
 
 int KeyLenth;
+char Letter;
 
 int main(int argc, string argv[])
 {
@@ -28,8 +29,8 @@ int main(int argc, string argv[])
 void GetEncUppLetter(char Letter)
 {
     int NumLetter = (int) Letter;
-    NumLetter = KeyLenth + 64;
-    if(NumLetter > 90) NumLetter = (NumLetter % 90) + 64;
+    NumLetter = KeyLenth + 65;
+    if(NumLetter > 90) NumLetter = (NumLetter % 90) + 65;
     char EncUppLetter = (char) NumLetter;
     printf("%c", EncUppLetter);
 }
@@ -37,8 +38,8 @@ void GetEncUppLetter(char Letter)
 void GetEncLowLetter(char Letter)
 {
     int NumLetter = (int) Letter;
-    NumLetter = KeyLenth + 96;
-    if(NumLetter > 122) NumLetter = (NumLetter % 90) + 96;
+    NumLetter = KeyLenth + 97;
+    if(NumLetter > 122) NumLetter = (NumLetter % 122) + 97;
     char EncUppLetter = (char) NumLetter;
     printf("%c", EncUppLetter);
 }
