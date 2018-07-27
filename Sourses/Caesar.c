@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <libcs50-8.1.0/cs50.h>
 
-void GetEncUppLetter(char Letter);
-void GetEncLowLetter(char Letter);
+void PrintEncUppLetter(char Letter);
+void PrintEncLowLetter(char Letter);
 
 int KeyLenth;
 
@@ -18,14 +18,14 @@ int main(int argc, string argv[])
     string Text = get_string();
     for(int i = 0, n = strlen(Text); i < n; i++)
     {
-        if(Text[i] > 64 && Text[i] < 91) GetEncUppLetter(Text[i]);
-        else if(Text[i] > 96 && Text[i] < 123) GetEncLowLetter(Text[i]);
+        if(Text[i] > 64 && Text[i] < 91) PrintEncUppLetter(Text[i]);
+        else if(Text[i] > 96 && Text[i] < 123) PrintEncLowLetter(Text[i]);
         else printf("%c", Text[i]);
     }
     return 0;
 }
 
-void GetEncUppLetter(char Letter)
+void PrintEncUppLetter(char Letter)
 {
     int NumLetter = (int) Letter;
     NumLetter += KeyLenth;
@@ -33,7 +33,7 @@ void GetEncUppLetter(char Letter)
     printf("%c", NumLetter);
 }
 
-void GetEncLowLetter(char Letter)
+void PrintEncLowLetter(char Letter)
 {
     int NumLetter = (int) Letter;
     NumLetter += KeyLenth;
