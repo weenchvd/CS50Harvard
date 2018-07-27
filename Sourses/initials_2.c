@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include "Libs/libcs50-8.1.0/cs50.h"
+#include <libcs50-8.1.0/cs50.h>
 
 void PRINTLETTER(char ch1);
 void printletter(char ch1);

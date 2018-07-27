@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "Libs/libcs50-8.1.0/cs50.h"
+#include <libcs50-8.1.0/cs50.h>
 
 int main(void) {
     int min;
