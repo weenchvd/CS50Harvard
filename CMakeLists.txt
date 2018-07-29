@@ -18,3 +18,4 @@ target_link_libraries(${FILE_NAME} cs50)
 
 install(TARGETS ${FILE_NAME} DESTINATION Build) #C:/_Code/C/CLionProjects/CS50Harvard/Build
 #install(PROGRAMS ${FILE_NAME} RUNTIME DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/Build/)
+#
