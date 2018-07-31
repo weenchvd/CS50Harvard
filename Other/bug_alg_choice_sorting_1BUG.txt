@@ -1,0 +1,41 @@
+C:\_Code\C\CLionProjects\CS50Harvard\cmake-build-debug>alg_choice_sorting_1BUG 434 5464 686786 3243 34 62 657 32 5 778 4 23244
+Unsorted list
+434     5464    686786  3243    34      62      657     32      5       778     4       23244
+Sorted list
+4       5       32      34      62      434     3243    657     778     5464    23244   686786
+
+
+
+C:\_Code\C\CLionProjects\CS50Harvard\cmake-build-debug>alg_choice_sorting_1BUG 54 54575 2 687 23 1 76 343 1279 954 354 72 45346 666 12
+Unsorted list
+54      54575   2       687     23      1       76      343     1279    954     354     72      45346   666     12
+
+Sorted list
+1       2       12      23      54      72      687     76      343     354     666     954     1279    54575   45346
+
+
+
+C:\_Code\C\CLionProjects\CS50Harvard\cmake-build-debug>alg_choice_sorting_1BUG 54 76 23 90 123 32 1 54 8 3 98 34
+Unsorted list
+54      76      23      90      123     32      1       54      8       3       98      34
+Sorted list
+1       3       8       23      32      34      123     54      54      90      76      98
+
+
+
+C:\_Code\C\CLionProjects\CS50Harvard\cmake-build-debug>alg_choice_sorting_1BUG 90 2 54 13
+Unsorted list
+90      2       54      13
+Sorted list
+2       13      90      54
+
+
+
+C:\_Code\C\CLionProjects\CS50Harvard\cmake-build-debug>alg_choice_sorting_1BUG 6 90 43 1
+Unsorted list
+6       90      43      1
+Sorted list
+1       6       90      43
+
+
+
