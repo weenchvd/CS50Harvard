@@ -7,7 +7,7 @@
  * Helper functions for Problem Set 3.
  */
  
-#include <cs50.h>
+#include <libcs50-8.1.0/cs50.h>
 
 /**
  * Returns true if value is in array of n values, else false.
