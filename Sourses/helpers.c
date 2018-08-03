@@ -6,9 +6,9 @@
  *
  * Helper functions for Problem Set 3.
  */
-       
-#include <libcs50-8.1.0/cs50.h>
 
+#include <stdio.h>
+#include <libcs50-8.1.0/cs50.h>
 #include "helpers.h"
 
 /**
@@ -16,7 +16,11 @@
  */
 bool search(int value, int values[], int n)
 {
-    // TODO: implement a searching algorithm
+    if(n < 1) return false;
+    for(int i = 0; i < n; i++)
+    {
+        if(value == values[i]) return true;
+    }
     return false;
 }
 
@@ -25,6 +29,17 @@ bool search(int value, int values[], int n)
  */
 void sort(int values[], int n)
 {
-    // TODO: implement an O(n^2) sorting algorithm
-    return;
+    for(int i = 1; i < n; i++)
+    {
+        for(int s = (i - 1); s >= 0; s--)
+        {
+            if(values[s+1] < values[s])
+            {
+                int tmp = values[s+1];
+                values[s+1] = values[s];
+                values[s] = tmp;
+            }
+            else(s = -1);
+        }
+    }
 }

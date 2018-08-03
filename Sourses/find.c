@@ -15,11 +15,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <libcs50-8.1.0/cs50.h>
-
 #include "helpers.h"
 
 // maximum amount of hay
-const int MAX = 65536;
+const int MAX = 30; //65536
 
 int main(int argc, string argv[])
 {
@@ -53,6 +52,7 @@ int main(int argc, string argv[])
 
     // sort the haystack
     sort(haystack, size);
+    for(int i = 0; i < size; i++) printf("\nSorted haystack[%d] = %d", i, haystack[i]);
 
     // try to find needle in haystack
     if (search(needle, haystack, size))
