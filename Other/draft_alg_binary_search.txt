@@ -6,14 +6,14 @@ int BinarySearch(int massive[], int * left_border, int * rigth_border);
 int n = 0;
 int * pntr_n = &n;
 
-int main(int argc, string argv[])
+int main() //int argc, string argv[]
 {
-    int q = (argc - 1);
-    int massive[q];
-    for(int i = 0; i < q; i++)
+    int q = 12; //int q = (argc - 1);
+    int massive[12] = { 1, 3, 4, 9, 11, 15, 20, 21, 25, 27, 31, 33};
+    /*for(int i = 0; i < q; i++)
     {
         massive[i] = atoi(argv[i+1]);
-    }
+    }*/
     printf("Quantity of numbers = %d. Massive:\n", q);
     for(int i = 0; i < q; i++)
     {
@@ -23,9 +23,66 @@ int main(int argc, string argv[])
     scanf("%d", &n);
     int addr = BinarySearch(massive, &massive[0], &massive[q-1]);
     if(addr == -1) printf("\nNumber '%d' is not find.\n", n);
-    else printf("Number '%d' is find! It is located in 'massive[%d]'.\n", n, addr);
+    else printf("Number '%d' is find! It is located in Massive[%d].\n", n, addr);
     return 0;
 }
+
+/*int BinarySearch(int massive[], int q, int n)
+{
+    for(int i = 0; i != -1; i++)
+    {
+        ((q % 2) == 1) ? (q = (q / 2) + 1) : (q = (q / 2));
+        if(n < massive[q]);
+        else if(n > massive[q]);
+        else i = -1;
+    }
+    return q;
+}*/
+
+/*int BinarySearch1(int massive[], int * left_border, int * rigth_border, int q)
+{
+    int middle;
+    int * left_b_new, * rigth_b_new;
+    /*if(q == 1)
+    {
+        if(* left_border == * pntr_n && * rigth_border == * pntr_n)
+        {
+            int a = (left_border - &massive[0]) / sizeof(massive[0]);
+            return a;
+        }
+    }
+    else
+    {
+        ((q % 2) == 1) ? (middle = ((q - 1) / 2) + 1) : (middle = (q / 2) + 1);
+    }*/
+    /*if(q > 2)
+    {
+        ((q % 2) == 1) ? (middle = ((q - 1) / 2) + 1) : (middle = (q / 2) + 1);
+        if(* pntr_n < massive[middle-1])
+        {
+            left_b_new = left_border;
+            rigth_b_new = rigth_border - middle + 1;
+            q = q - middle + 1;
+            BinarySearch(massive, left_b_new, rigth_b_new, q);
+        }
+        else if(* pntr_n > massive[middle-1])
+        {
+            left_b_new = left_border - middle + 1;
+            rigth_b_new = rigth_border;
+            q = q - middle + 1;
+            BinarySearch(massive, left_b_new, rigth_b_new, q);
+        }
+        else if(* pntr_n == massive[middle-1])
+        {
+            int a = (left_border - &massive[0]) / sizeof(massive[0]);
+            return a;
+        }
+    }
+    else
+    {
+
+    }
+}*/
 
 int BinarySearch(int massive[], int * left_border, int * rigth_border)
 {
