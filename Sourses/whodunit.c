@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "bmp.h"
+
+bool FuncCountColor(RGBTRIPLE * pntr_strt_TempTriple, RGBTRIPLE * pntr_strt_TriplePixel[], int ColorCntr);
 
 int main(int argc, char* argv[])
 {
@@ -60,6 +63,9 @@ int main(int argc, char* argv[])
     // determine padding for scanlines
     int padding =  (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
 
+    RGBTRIPLE strt_TriplePixel[1000] = {0xFF, 0xFF, 0xFF};
+    int ColorCounter = 1;
+
     // iterate over infile's scanlines
     for (int i = 0, biHeight = abs(bi.biHeight); i < biHeight; i++)
     {
@@ -67,13 +73,22 @@ int main(int argc, char* argv[])
         for (int j = 0; j < bi.biWidth; j++)
         {
             // temporary storage
-            RGBTRIPLE triple;
+            RGBTRIPLE strt_TempTriple;
 
-            // read RGB triple from infile
-            fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
+            // read RGB strt_TempTriple from infile
+            fread(&strt_TempTriple, sizeof(RGBTRIPLE), 1, inptr);
 
-            // write RGB triple to outfile
-            fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr);
+            if(FuncCountColor(&strt_TempTriple, &strt_TriplePixel, ColorCounter))
+            {
+                ColorCounter++;
+                strt_TriplePixel[ColorCounter-1] = strt_TempTriple;
+            }
+
+            if(strt_TempTriple.rgbtBlue == 0x0 && strt_TempTriple.rgbtGreen == 0x0 && strt_TempTriple.rgbtRed == 0xFF)
+            {
+                fwrite(&strt_TriplePixel[1], sizeof(RGBTRIPLE), 1, outptr);
+            }
+            else fwrite(&strt_TempTriple, sizeof(RGBTRIPLE), 1, outptr);
         }
 
         // skip over padding, if any
@@ -86,6 +101,8 @@ int main(int argc, char* argv[])
         }
     }
 
+    printf("Number of colors is %d", ColorCounter);
+
     // close infile
     fclose(inptr);
 
@@ -94,4 +111,18 @@ int main(int argc, char* argv[])
 
     // that's all folks
     return 0;
+}
+
+bool FuncCountColor(RGBTRIPLE * pntr_strt_TempTriple, RGBTRIPLE * pntr_strt_TriplePixel[], int ColorCntr)
+{
+    for(int c = 0; c < ColorCntr; c++)
+    {
+        if ((* pntr_strt_TempTriple).rgbtBlue == (* pntr_strt_TriplePixel[c]).rgbtBlue &&
+                (* pntr_strt_TempTriple).rgbtGreen == (* pntr_strt_TriplePixel[c]).rgbtGreen &&
+                (* pntr_strt_TempTriple).rgbtRed == (* pntr_strt_TriplePixel[c]).rgbtRed)
+        {
+            return false;
+        }
+    }
+    return true;
 }
