@@ -4,7 +4,7 @@
 
 #include "bmp.h"
 
-bool FuncCountColor(RGBTRIPLE * pntr_strt_TempTriple, RGBTRIPLE * pntr_strt_TriplePixel, int ColorCntr, int * pntr_MassiveColorCounter);
+bool FuncCountColor(RGBTRIPLE *, struct colors *, int ColorCntr);
 
 int main(int argc, char* argv[])
 {
@@ -65,10 +65,19 @@ int main(int argc, char* argv[])
 
     RGBTRIPLE strt_TripleWhitePixel = {0xFF, 0xFF, 0xFF};
     RGBTRIPLE strt_TripleBlackPixel = {0x0, 0x0, 0x0};
-    RGBTRIPLE strt_TriplePixel[1000] = {0x0, 0x0, 0x0};
-    RGBTRIPLE * pntr_strt_TriplePixel = strt_TriplePixel;
-    int MassiveColorCounter[1000] = {0};
-    int * pntr_MassiveColorCounter = MassiveColorCounter;
+    //RGBTRIPLE strt_TriplePixel[1000] = {0x0, 0x0, 0x0};
+    //RGBTRIPLE * pntr_strt_TriplePixel = strt_TriplePixel;
+    struct colors
+    {
+        int counter;
+        int RED;
+        int GREEN;
+        int BLUE;
+    };
+    struct colors strt_col_massive[1000] = {0, 0, 0, 0};
+    struct colors * pntr_strt_col_massive = strt_col_massive;
+    //int MassiveColorCounter[1000] = {0};
+    //int * pntr_MassiveColorCounter = MassiveColorCounter;
     int ColorCounter = 0;
 
     // iterate over infile's scanlines
@@ -83,10 +92,12 @@ int main(int argc, char* argv[])
             // read RGB strt_TempTriple from infile
             fread(&strt_TempTriple, sizeof(RGBTRIPLE), 1, inptr);
 
-            if(FuncCountColor(&strt_TempTriple, pntr_strt_TriplePixel, ColorCounter, pntr_MassiveColorCounter))
+            if(FuncCountColor(&strt_TempTriple, pntr_strt_col_massive, ColorCounter)
             {
                 ColorCounter++;
-                strt_TriplePixel[ColorCounter-1] = strt_TempTriple;
+                pntr_strt_col_massive[ColorCounter-1].RED = strt_TempTriple.rgbtRed;
+                pntr_strt_col_massive[ColorCounter-1].GREEN = strt_TempTriple.rgbtGreen;
+                pntr_strt_col_massive[ColorCounter-1].BLUE = strt_TempTriple.rgbtBlue;
             }
 
             if(strt_TempTriple.rgbtBlue == 0x0 && strt_TempTriple.rgbtGreen == 0x0 && strt_TempTriple.rgbtRed == 0xFF)
@@ -110,8 +121,8 @@ int main(int argc, char* argv[])
 
     for(int c = 0; c < ColorCounter; c++)
     {
-        printf("Color RGB: %2X %2X %2X\n", strt_TriplePixel[c].rgbtRed, strt_TriplePixel[c].rgbtGreen, strt_TriplePixel[c].rgbtBlue);
-        printf("Quantity of pixels of this color: %6d\n\n", MassiveColorCounter[c]);
+        printf("Color RGB: %2X %2X %2X\tQuantity of pixels: %6d\n",
+               strt_col_massive[c].RED, strt_col_massive[c].GREEN, strt_col_massive[c].BLUE, strt_col_massive[c].counter);
     }
 
     // close infile
@@ -124,15 +135,15 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-bool FuncCountColor(RGBTRIPLE * pntr_strt_TempTriple, RGBTRIPLE * pntr_strt_TriplePixel, int ColorCntr, int * pntr_MassiveColorCounter)
+bool FuncCountColor(RGBTRIPLE * pntr_strt_TempTriple, struct colors * pntr_strt_col_massive, int ColorCntr)
 {
     for(int c = 0; c <= ColorCntr; c++)
     {
-        if ((* pntr_strt_TempTriple).rgbtBlue == (* (pntr_strt_TriplePixel+c)).rgbtBlue &&
-                (* pntr_strt_TempTriple).rgbtGreen == (* (pntr_strt_TriplePixel+c)).rgbtGreen &&
-                (* pntr_strt_TempTriple).rgbtRed == (* (pntr_strt_TriplePixel+c)).rgbtRed)
+        if ((* pntr_strt_TempTriple).rgbtBlue == (* (pntr_strt_col_massive+c)).BLUE &&
+                (* pntr_strt_TempTriple).rgbtGreen == (* (pntr_strt_col_massive+c)).GREEN &&
+                (* pntr_strt_TempTriple).rgbtRed == (* (pntr_strt_col_massive+c)).RED)
         {
-            (* (pntr_MassiveColorCounter + c))++;
+            (* (pntr_strt_col_massive + c)).counter++;
             return false;
         }
     }
