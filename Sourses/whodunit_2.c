@@ -73,22 +73,10 @@ int main(int argc, char* argv[])
     int padding =  (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
 
     RGBTRIPLE strt_TripleWhitePixel = {0xFF, 0xFF, 0xFF};
-    ///RGBTRIPLE strt_TripleBlackPixel = {0x0, 0x0, 0x0};
+    //RGBTRIPLE strt_TripleBlackPixel = {0x0, 0x0, 0x0};
+    RGBTRIPLE strt_Blackout = {0x1F, 0x1F, 0x1F};
     COLORS strt_col_massive[1000] = {0, 0, 0, 0};
     COLORS * pntr_strt_col_massive = strt_col_massive;
-    //RGBTRIPLE strt_TriplePixel[1000] = {0x0, 0x0, 0x0};
-    //RGBTRIPLE * pntr_strt_TriplePixel = strt_TriplePixel;
-    /*struct colors
-    {
-        int counter;
-        int RED;
-        int GREEN;
-        int BLUE;
-    };
-    struct colors strt_col_massive[1000] = {0, 0, 0, 0};
-    struct colors * pntr_strt_col_massive = strt_col_massive;*/
-    //int MassiveColorCounter[1000] = {0};
-    //int * pntr_MassiveColorCounter = MassiveColorCounter;
     int ColorCounter = 0;
 
     // iterate over infile's scanlines
@@ -116,13 +104,14 @@ int main(int argc, char* argv[])
             {
                 fwrite(&strt_TripleWhitePixel, sizeof(RGBTRIPLE), 1, outptr);
             }
-            else
+            else if(strt_TempTriple.rgbtRed < 0xFF)
             {
-                strt_TempTriple.rgbtRed = strt_TripleWhitePixel.rgbtRed - strt_TempTriple.rgbtRed;
-                strt_TempTriple.rgbtGreen = strt_TripleWhitePixel.rgbtGreen - strt_TempTriple.rgbtGreen;
-                strt_TempTriple.rgbtBlue = strt_TripleWhitePixel.rgbtBlue - strt_TempTriple.rgbtBlue;
+                strt_TempTriple.rgbtRed = strt_TempTriple.rgbtRed - strt_Blackout.rgbtRed;
+                //strt_TempTriple.rgbtGreen = strt_TempTriple.rgbtGreen - strt_Blackout.rgbtGreen;
+                //strt_TempTriple.rgbtBlue = strt_TempTriple.rgbtBlue - strt_Blackout.rgbtBlue;
                 fwrite(&strt_TempTriple, sizeof(RGBTRIPLE), 1, outptr);
             }
+            else fwrite(&strt_TempTriple, sizeof(RGBTRIPLE), 1, outptr);
         }
 
         // skip over padding, if any

@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
     int padding =  (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
 
     RGBTRIPLE strt_TripleWhitePixel = {0xFF, 0xFF, 0xFF};
-    RGBTRIPLE strt_TripleBlackPixel = {0x0, 0x0, 0x0};
+    //RGBTRIPLE strt_TripleBlackPixel = {0x0, 0x0, 0x0};
     RGBTRIPLE strt_TriplePixel[1000] = {0x0, 0x0, 0x0};
     RGBTRIPLE * pntr_strt_TriplePixel = strt_TriplePixel;
     int MassiveColorCounter[1000] = {0};
