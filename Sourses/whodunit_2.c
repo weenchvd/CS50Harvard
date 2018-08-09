@@ -4,7 +4,16 @@
 
 #include "bmp.h"
 
-bool FuncCountColor(RGBTRIPLE *, struct colors *, int ColorCntr);
+typedef struct
+{
+    int counter;
+    BYTE  BLUE;
+    BYTE  GREEN;
+    BYTE  RED;
+} COLORS;
+
+bool FuncCountColor(RGBTRIPLE *, COLORS *, int);
+void InsertionSorting(COLORS *, int);
 
 int main(int argc, char* argv[])
 {
@@ -64,10 +73,12 @@ int main(int argc, char* argv[])
     int padding =  (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
 
     RGBTRIPLE strt_TripleWhitePixel = {0xFF, 0xFF, 0xFF};
-    RGBTRIPLE strt_TripleBlackPixel = {0x0, 0x0, 0x0};
+    ///RGBTRIPLE strt_TripleBlackPixel = {0x0, 0x0, 0x0};
+    COLORS strt_col_massive[1000] = {0, 0, 0, 0};
+    COLORS * pntr_strt_col_massive = strt_col_massive;
     //RGBTRIPLE strt_TriplePixel[1000] = {0x0, 0x0, 0x0};
     //RGBTRIPLE * pntr_strt_TriplePixel = strt_TriplePixel;
-    struct colors
+    /*struct colors
     {
         int counter;
         int RED;
@@ -75,7 +86,7 @@ int main(int argc, char* argv[])
         int BLUE;
     };
     struct colors strt_col_massive[1000] = {0, 0, 0, 0};
-    struct colors * pntr_strt_col_massive = strt_col_massive;
+    struct colors * pntr_strt_col_massive = strt_col_massive;*/
     //int MassiveColorCounter[1000] = {0};
     //int * pntr_MassiveColorCounter = MassiveColorCounter;
     int ColorCounter = 0;
@@ -92,19 +103,26 @@ int main(int argc, char* argv[])
             // read RGB strt_TempTriple from infile
             fread(&strt_TempTriple, sizeof(RGBTRIPLE), 1, inptr);
 
-            if(FuncCountColor(&strt_TempTriple, pntr_strt_col_massive, ColorCounter)
+            if(FuncCountColor(&strt_TempTriple, pntr_strt_col_massive, ColorCounter))
             {
+                strt_col_massive[ColorCounter].RED = strt_TempTriple.rgbtRed;
+                strt_col_massive[ColorCounter].GREEN = strt_TempTriple.rgbtGreen;
+                strt_col_massive[ColorCounter].BLUE = strt_TempTriple.rgbtBlue;
+                strt_col_massive[ColorCounter].counter++;
                 ColorCounter++;
-                pntr_strt_col_massive[ColorCounter-1].RED = strt_TempTriple.rgbtRed;
-                pntr_strt_col_massive[ColorCounter-1].GREEN = strt_TempTriple.rgbtGreen;
-                pntr_strt_col_massive[ColorCounter-1].BLUE = strt_TempTriple.rgbtBlue;
             }
 
             if(strt_TempTriple.rgbtBlue == 0x0 && strt_TempTriple.rgbtGreen == 0x0 && strt_TempTriple.rgbtRed == 0xFF)
             {
                 fwrite(&strt_TripleWhitePixel, sizeof(RGBTRIPLE), 1, outptr);
             }
-            else fwrite(&strt_TempTriple, sizeof(RGBTRIPLE), 1, outptr);
+            else
+            {
+                strt_TempTriple.rgbtRed = strt_TripleWhitePixel.rgbtRed - strt_TempTriple.rgbtRed;
+                strt_TempTriple.rgbtGreen = strt_TripleWhitePixel.rgbtGreen - strt_TempTriple.rgbtGreen;
+                strt_TempTriple.rgbtBlue = strt_TripleWhitePixel.rgbtBlue - strt_TempTriple.rgbtBlue;
+                fwrite(&strt_TempTriple, sizeof(RGBTRIPLE), 1, outptr);
+            }
         }
 
         // skip over padding, if any
@@ -117,7 +135,9 @@ int main(int argc, char* argv[])
         }
     }
 
-    printf("Number of colors is %d\n", ColorCounter);
+    InsertionSorting(pntr_strt_col_massive, ColorCounter);
+
+    printf("Quantity of colors is %d\n", ColorCounter);
 
     for(int c = 0; c < ColorCounter; c++)
     {
@@ -135,7 +155,7 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-bool FuncCountColor(RGBTRIPLE * pntr_strt_TempTriple, struct colors * pntr_strt_col_massive, int ColorCntr)
+bool FuncCountColor(RGBTRIPLE * pntr_strt_TempTriple, COLORS * pntr_strt_col_massive, int ColorCntr)
 {
     for(int c = 0; c <= ColorCntr; c++)
     {
@@ -143,9 +163,26 @@ bool FuncCountColor(RGBTRIPLE * pntr_strt_TempTriple, struct colors * pntr_strt_
                 (* pntr_strt_TempTriple).rgbtGreen == (* (pntr_strt_col_massive+c)).GREEN &&
                 (* pntr_strt_TempTriple).rgbtRed == (* (pntr_strt_col_massive+c)).RED)
         {
-            (* (pntr_strt_col_massive + c)).counter++;
+            (* (pntr_strt_col_massive+c)).counter++;
             return false;
         }
     }
     return true;
+}
+
+void InsertionSorting(COLORS * pntr_strt_col_massive, int ColorCntr)
+{
+    for(int i = 1; i < ColorCntr; i++)
+    {
+        for(int s = (i - 1); s >= 0; s--)
+        {
+            if((* (pntr_strt_col_massive+s+1)).counter < (* (pntr_strt_col_massive+s)).counter)
+            {
+                COLORS tmp = * (pntr_strt_col_massive+s+1);
+                * (pntr_strt_col_massive+s+1) = * (pntr_strt_col_massive+s);
+                * (pntr_strt_col_massive+s) = tmp;
+            }
+            else(s = -1);
+        }
+    }
 }
