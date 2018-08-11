@@ -52,12 +52,6 @@ int main(int argc, char* argv[])
         return 4;
     }
 
-    // write outfile's BITMAPFILEHEADER
-    fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, outptr);
-
-    // write outfile's BITMAPINFOHEADER
-    fwrite(&bi, sizeof(BITMAPINFOHEADER), 1, outptr);
-
     // determine padding for scanlines
     int padding =  (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
 
@@ -68,13 +62,13 @@ int main(int argc, char* argv[])
         for (int j = 0; j < bi.biWidth; j++)
         {
             // temporary storage
-            RGBTRIPLE triple;
+            RGBTRIPLE strt_TempTripleStor;
 
-            // read RGB triple from infile
-            fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
+            // read RGB strt_TempTripleStor from infile
+            fread(&strt_TempTripleStor, sizeof(RGBTRIPLE), 1, inptr);
 
-            // write RGB triple to outfile
-            fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr);
+            // write RGB strt_TempTripleStor to outfile
+            fwrite(&strt_TempTripleStor, sizeof(RGBTRIPLE), 1, outptr);
         }
 
         // skip over padding, if any
@@ -86,6 +80,17 @@ int main(int argc, char* argv[])
             fputc(0x00, outptr);
         }
     }
+
+    bi.biWidth = bi.biWidth * n;
+    bi.biHeight = bi.biHeight * n;
+    bi.biSizeImage = ((DWORD) bi.biWidth * (DWORD) bi.biHeight * bi.biBitCount / 8) + (bi.biHeight * padding);
+    bf.bfSize = bf.bfOffBits + bi.biSizeImage;
+
+    // write outfile's BITMAPFILEHEADER
+    fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, outptr);
+
+    // write outfile's BITMAPINFOHEADER
+    fwrite(&bi, sizeof(BITMAPINFOHEADER), 1, outptr);
 
     // close infile
     fclose(inptr);
