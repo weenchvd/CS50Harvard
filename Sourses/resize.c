@@ -12,8 +12,14 @@ int main(int argc, char* argv[])
         return 1;
     }
 
+    unsigned int n = (unsigned int) atoi(argv[1]);
+    if(n < 1 || n > 100)
+    {
+        printf("Use 'n' from 1 to 100");
+        return 5;
+    }
+
     // remember filenames
-    int n = atoi(argv[1]);
     char* infile = argv[2];
     char* outfile = argv[3];
 
@@ -54,36 +60,12 @@ int main(int argc, char* argv[])
 
     // determine padding for scanlines
     int padding =  (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
-
-    // iterate over infile's scanlines
-    for (int i = 0, biHeight = abs(bi.biHeight); i < biHeight; i++)
-    {
-        // iterate over pixels in scanline
-        for (int j = 0; j < bi.biWidth; j++)
-        {
-            // temporary storage
-            RGBTRIPLE strt_TempTripleStor;
-
-            // read RGB strt_TempTripleStor from infile
-            fread(&strt_TempTripleStor, sizeof(RGBTRIPLE), 1, inptr);
-
-            // write RGB strt_TempTripleStor to outfile
-            fwrite(&strt_TempTripleStor, sizeof(RGBTRIPLE), 1, outptr);
-        }
-
-        // skip over padding, if any
-        fseek(inptr, padding, SEEK_CUR);
-
-        // then add it back (to demonstrate how)
-        for (int k = 0; k < padding; k++)
-        {
-            fputc(0x00, outptr);
-        }
-    }
+    int NewPadding = (4 - (bi.biWidth * n * sizeof(RGBTRIPLE)) % 4) % 4;
 
     bi.biWidth = bi.biWidth * n;
     bi.biHeight = bi.biHeight * n;
-    bi.biSizeImage = ((DWORD) bi.biWidth * (DWORD) bi.biHeight * bi.biBitCount / 8) + (bi.biHeight * padding);
+    bi.biSizeImage = ((DWORD) bi.biWidth * ((DWORD) abs(bi.biHeight)) * (DWORD) bi.biBitCount / 8) +
+            (((DWORD) abs(bi.biHeight)) * (DWORD) NewPadding);
     bf.bfSize = bf.bfOffBits + bi.biSizeImage;
 
     // write outfile's BITMAPFILEHEADER
@@ -92,6 +74,41 @@ int main(int argc, char* argv[])
     // write outfile's BITMAPINFOHEADER
     fwrite(&bi, sizeof(BITMAPINFOHEADER), 1, outptr);
 
+    // iterate over infile's scanlines
+    for (int i = 0, biHeight_origin = (abs(bi.biHeight) / n), biWidth_origin = (bi.biWidth / n); i < biHeight_origin; i++)
+    {
+        // temporary storage
+        RGBTRIPLE strt_TempTripleStorMassive[biWidth_origin];
+        RGBTRIPLE * pntr_strt_TempTripleStorMassive = strt_TempTripleStorMassive;
+
+        for(int j = 0; j < biWidth_origin; j++)
+        {
+            // read RGB strt_TempTripleStor from infile
+            fread((pntr_strt_TempTripleStorMassive + j), sizeof(RGBTRIPLE), 1, inptr);
+        }
+
+        // skip over padding, if any
+        fseek(inptr, padding, SEEK_CUR);
+
+        for(int s = 0; s < n; s++)
+        {
+            for(int f = 0; f < biWidth_origin; f++)
+            {
+                for(int t = 0; t < n; t++)
+                {
+                    // write RGB strt_TempTripleStor to outfile
+                    fwrite((pntr_strt_TempTripleStorMassive + f), sizeof(RGBTRIPLE), 1, outptr);
+                }
+            }
+
+            // then add it back (to demonstrate how)
+            for (int k = 0; k < NewPadding; k++)
+            {
+                fputc(0x00, outptr);
+            }
+        }
+    }
+
     // close infile
     fclose(inptr);
 
@@ -99,5 +116,6 @@ int main(int argc, char* argv[])
     fclose(outptr);
 
     // that's all folks
+    printf("Done!");
     return 0;
 }
