@@ -63,35 +63,47 @@ int main(int argc, char* argv[])
             }
         }
     }
+    printf("End of source. Files restored.\n");
+    return 0;
 }
 
 bool WriteRestoredFile(FILE * Pntr_FO, BYTE * Pntr_TempStor, int Counter)
 {
-    char NameFile[] = "RestoredFile-";
+    char NameFile[] = "RestoredFile.jpg";
     char Extension[] = ".jpg";
 
-    FILE * Pntr_FW = fopen(NameFile(Counter)Extension, "w");
+    FILE * Pntr_FW = fopen(NameFile Counter Extension, "w");
     if(Pntr_FW == NULL)
     {
         fclose(Pntr_FO);
-        fprintf(stderr, "File %s%d%s does not create\n", NameFile, Counter, Extension);
+        fprintf(stderr, "File %s%d%s does not create\n", NameFile, Counter, Extension); //TODO
         return false;
     }
 
-    while(1)
+    while(fread(Pntr_TempStor, sizeof(BYTE), 1, Pntr_FO) != EOF)
     {
-        fread(Pntr_TempStor, sizeof(BYTE), 1, Pntr_FO);
         fwrite(Pntr_TempStor, sizeof(BYTE), 1 , Pntr_FW);
         if(* Pntr_TempStor == 0xFF)
         {
-            fread(Pntr_TempStor, sizeof(BYTE), 1, Pntr_FO);
-            if(* Pntr_TempStor == 0xD9)
+            if(fread(Pntr_TempStor, sizeof(BYTE), 1, Pntr_FO) != EOF)
             {
                 fwrite(Pntr_TempStor, sizeof(BYTE), 1 , Pntr_FW);
-                fclose(Pntr_FW);
-                return true;
+                if(* Pntr_TempStor == 0xD9)
+                {
+                    fclose(Pntr_FW);
+                    return true;
+                }
             }
-            fwrite(Pntr_TempStor, sizeof(BYTE), 1 , Pntr_FW);
+            else
+            {
+                fclose(Pntr_FW);
+                fprintf(stderr, "Error: File does not create! End of source.\n");
+                return false;
+            }
         }
     }
+
+    fclose(Pntr_FW);
+    fprintf(stderr, "Error: File does not create! End of source.\n");
+    return false;
 }
