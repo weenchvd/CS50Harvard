@@ -13,7 +13,7 @@
 
 typedef uint8_t BYTE;
 
-bool WriteRestoredFile(FILE *, BYTE *, int);
+bool WriteRestoredFile(FILE *, BYTE *, BYTE *, int);
 
 int main(int argc, char* argv[])
 {
@@ -24,7 +24,6 @@ int main(int argc, char* argv[])
     }
 
     int Counter = 1;
-    //int * Pntr_Counter = &Counter;
     char * Pntr_Infile = argv[1];
 
     FILE * Pntr_FO = fopen(Pntr_Infile, "r");
@@ -51,7 +50,7 @@ int main(int argc, char* argv[])
             if(TempStorMassive[1] == 0xD8 && TempStorMassive[2] == 0xFF &&
                TempStorMassive[3] >= 0xE0 && TempStorMassive[3] <= 0xEF)
             {
-                if(WriteRestoredFile(Pntr_FO, Pntr_TempStor, Counter));
+                if(WriteRestoredFile(Pntr_FO, Pntr_TempStor, Pntr_TempStorMassive, Counter))
                 {
                     Counter++;
                 }
@@ -67,17 +66,22 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-bool WriteRestoredFile(FILE * Pntr_FO, BYTE * Pntr_TempStor, int Counter)
+bool WriteRestoredFile(FILE * Pntr_FO, BYTE * Pntr_TempStor, BYTE * Pntr_TempStorMassive, int Counter)
 {
     char NameFile[] = "RestoredFile.jpg";
     char Extension[] = ".jpg";
 
-    FILE * Pntr_FW = fopen(NameFile Counter Extension, "w");
+    FILE * Pntr_FW = fopen(NameFile, "w");
     if(Pntr_FW == NULL)
     {
         fclose(Pntr_FO);
         fprintf(stderr, "File %s%d%s does not create\n", NameFile, Counter, Extension); //TODO
         return false;
+    }
+
+    for(int i = 0; i < 4; i++)
+    {
+        fwrite((Pntr_TempStorMassive + i), sizeof(BYTE), 1, Pntr_FW);
     }
 
     while(fread(Pntr_TempStor, sizeof(BYTE), 1, Pntr_FO) != EOF)
