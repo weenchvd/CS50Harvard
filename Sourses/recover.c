@@ -11,9 +11,21 @@
  * Recovers JPEGs from a forensic image.
  */
 
+#define QUANTITYDIGIT 6
+
+const char FileNamePrefix[] = "RestoredFile-";
+const char FileNamePostfix[] = ".jpg";
+
 typedef uint8_t BYTE;
 
-bool WriteRestoredFile(FILE *, BYTE *, BYTE *, int);
+typedef union
+{
+    char Letter;
+    int LetterNumber;
+} FILECOUNTER;
+
+bool WriteRestoredFile(FILE *, BYTE *, BYTE *, char *, int);
+void IncreaseFileNameCounter(char *, FILECOUNTER *, int);
 
 int main(int argc, char* argv[])
 {
@@ -33,6 +45,34 @@ int main(int argc, char* argv[])
         return 2;
     }
 
+    //создание имени файла со счетчиком в названии
+    FILECOUNTER Union_FileCounter[QUANTITYDIGIT];
+    FILECOUNTER * Pntr_Union_FileCounter = Union_FileCounter;
+    for(int x = 0; x < QUANTITYDIGIT; x++)
+    {
+        (*(Pntr_Union_FileCounter+x)).LetterNumber = 48;
+    }
+    Union_FileCounter[QUANTITYDIGIT-1].LetterNumber = 49;
+
+    int q1 = (sizeof(FileNamePrefix) / sizeof(FileNamePrefix[0])) - 1;
+    int q2 = (sizeof(FileNamePostfix) / sizeof(FileNamePostfix[0])) - 1;
+    char FileName[q1+QUANTITYDIGIT+q2];
+    char * Pntr_FileName = FileName;
+
+    for(int y = 0; y < q1; y++)
+    {
+        FileName[y] = FileNamePrefix[y];
+    }
+    for(int t = q1, f = 0; t < (q1 + QUANTITYDIGIT); t++, f++)
+    {
+        FileName[t] = (*(Pntr_Union_FileCounter+f)).Letter;
+    }
+    for(int m = (q1 + QUANTITYDIGIT), n = 0; m < (q1 + QUANTITYDIGIT + q2); m++, n++)
+    {
+        FileName[m] = FileNamePostfix[n];
+    }
+
+
     BYTE TempStor;
     BYTE * Pntr_TempStor = &TempStor;
     while(fread(Pntr_TempStor, sizeof(BYTE), 1, Pntr_FO) != EOF)
@@ -50,8 +90,9 @@ int main(int argc, char* argv[])
             if(TempStorMassive[1] == 0xD8 && TempStorMassive[2] == 0xFF &&
                TempStorMassive[3] >= 0xE0 && TempStorMassive[3] <= 0xEF)
             {
-                if(WriteRestoredFile(Pntr_FO, Pntr_TempStor, Pntr_TempStorMassive, Counter))
+                if(WriteRestoredFile(Pntr_FO, Pntr_TempStor, Pntr_TempStorMassive, Pntr_FileName, Counter))
                 {
+                    IncreaseFileNameCounter(Pntr_FileName, Pntr_Union_FileCounter, q1);
                     Counter++;
                 }
                 else
@@ -66,16 +107,13 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-bool WriteRestoredFile(FILE * Pntr_FO, BYTE * Pntr_TempStor, BYTE * Pntr_TempStorMassive, int Counter)
+bool WriteRestoredFile(FILE * Pntr_FO, BYTE * Pntr_TempStor, BYTE * Pntr_TempStorMassive, char * Pntr_FileName, int Counter)
 {
-    char NameFile[] = "RestoredFile.jpg";
-    char Extension[] = ".jpg";
-
-    FILE * Pntr_FW = fopen(NameFile, "w");
+    FILE * Pntr_FW = fopen(Pntr_FileName, "w");
     if(Pntr_FW == NULL)
     {
         fclose(Pntr_FO);
-        fprintf(stderr, "File %s%d%s does not create\n", NameFile, Counter, Extension); //TODO
+        fprintf(stderr, "File \"%s\" does not create\n", Pntr_FileName);
         return false;
     }
 
@@ -110,4 +148,34 @@ bool WriteRestoredFile(FILE * Pntr_FO, BYTE * Pntr_TempStor, BYTE * Pntr_TempSto
     fclose(Pntr_FW);
     fprintf(stderr, "Error: File does not create! End of source.\n");
     return false;
+}
+
+void IncreaseFileNameCounter(char * Pntr_FileName, FILECOUNTER * Pntr_Union_FileCounter, int q1)
+{
+    (*(Pntr_Union_FileCounter+q1+QUANTITYDIGIT-1)).LetterNumber++;
+    for(int s = (q1 + QUANTITYDIGIT - 1); s > (q1 - 1); s--)
+    {
+        if((*(Pntr_Union_FileCounter+s)).LetterNumber > 57)
+        {
+            if((Pntr_Union_FileCounter + s) == (Pntr_Union_FileCounter + q1))
+            {
+                fprintf(stderr, "The file counter was full and zeroed.\n");
+                for(int x = 0; x < QUANTITYDIGIT; x++)
+                {
+                    (*(Pntr_Union_FileCounter+x)).LetterNumber = 48;
+                }
+                (*(Pntr_Union_FileCounter+QUANTITYDIGIT-1)).LetterNumber = 49;
+            }
+            else
+            {
+                (*(Pntr_Union_FileCounter+s)).LetterNumber = 48;
+                (*(Pntr_Union_FileCounter+s-1)).LetterNumber++;
+            }
+        }
+    }
+
+    for(int t = q1, f = 0; t < (q1 + QUANTITYDIGIT); t++, f++)
+    {
+        *(Pntr_FileName+t) = (*(Pntr_Union_FileCounter+f)).Letter;
+    }
 }
