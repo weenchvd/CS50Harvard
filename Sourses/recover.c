@@ -13,8 +13,8 @@
 
 #define QUANTITYDIGIT 6
 
-const char FileNamePrefix[] = "RestoredFile-";
-const char FileNamePostfix[] = ".jpg";
+const char FileNamePrefix[] = "RestoredFile-"; //префикс имени файла до счетчика
+const char FileNamePostfix[] = ".jpg"; //расширение файла
 
 typedef uint8_t BYTE;
 
@@ -24,7 +24,7 @@ typedef union
     int LetterNumber;
 } FILECOUNTER;
 
-bool WriteRestoredFile(FILE *, BYTE *, BYTE *, char *, int);
+bool WriteRestoredFile(FILE *, BYTE *, BYTE *, char *);
 void IncreaseFileNameCounter(char *, FILECOUNTER *, int);
 
 int main(int argc, char* argv[])
@@ -35,20 +35,22 @@ int main(int argc, char* argv[])
         return 1;
     }
 
+    //счетчик количества восстановленных файлов
     int Counter = 1;
     char * Pntr_Infile = argv[1];
 
-    FILE * Pntr_FO = fopen(Pntr_Infile, "r");
+    //открытие исходного файла
+    FILE * Pntr_FO = fopen(Pntr_Infile, "rb");
     if(Pntr_FO == NULL)
     {
-        fprintf(stderr, "File %s does not open\n", Pntr_Infile);
+        fprintf(stderr, "File \"%s\" does not open\n", Pntr_Infile);
         return 2;
     }
 
     //создание имени файла со счетчиком в названии
     FILECOUNTER Union_FileCounter[QUANTITYDIGIT];
     FILECOUNTER * Pntr_Union_FileCounter = Union_FileCounter;
-    for(int x = 0; x < QUANTITYDIGIT; x++)
+    for(int x = 0; x < QUANTITYDIGIT; x++) //заполняет массив и устанавливает счетчик на "1"
     {
         (*(Pntr_Union_FileCounter+x)).LetterNumber = 48;
     }
@@ -59,9 +61,9 @@ int main(int argc, char* argv[])
     char FileName[q1+QUANTITYDIGIT+q2];
     char * Pntr_FileName = FileName;
 
-    for(int y = 0; y < q1; y++)
+    for(int s = 0; s < q1; s++) //заполняет массив для создания конечного имени файла
     {
-        FileName[y] = FileNamePrefix[y];
+        FileName[s] = FileNamePrefix[s];
     }
     for(int t = q1, f = 0; t < (q1 + QUANTITYDIGIT); t++, f++)
     {
@@ -73,9 +75,10 @@ int main(int argc, char* argv[])
     }
 
 
+    //поиск начала JPEG файла и вызов функций: запись файла, увеличение счетчика в имени файла
     BYTE TempStor;
     BYTE * Pntr_TempStor = &TempStor;
-    while(fread(Pntr_TempStor, sizeof(BYTE), 1, Pntr_FO) != EOF)
+    while(fread(Pntr_TempStor, sizeof(BYTE), 1, Pntr_FO) == 1)
     {
         if(* Pntr_TempStor == 0xFF)
         {
@@ -90,7 +93,7 @@ int main(int argc, char* argv[])
             if(TempStorMassive[1] == 0xD8 && TempStorMassive[2] == 0xFF &&
                TempStorMassive[3] >= 0xE0 && TempStorMassive[3] <= 0xEF)
             {
-                if(WriteRestoredFile(Pntr_FO, Pntr_TempStor, Pntr_TempStorMassive, Pntr_FileName, Counter))
+                if(WriteRestoredFile(Pntr_FO, Pntr_TempStor, Pntr_TempStorMassive, Pntr_FileName))
                 {
                     IncreaseFileNameCounter(Pntr_FileName, Pntr_Union_FileCounter, q1);
                     Counter++;
@@ -103,13 +106,14 @@ int main(int argc, char* argv[])
             }
         }
     }
-    printf("End of source. Files restored.\n");
+    fclose(Pntr_FO);
+    printf("\nEnd of source. Files restored.\nQuantity of files: %d\n", (Counter-1));
     return 0;
 }
 
-bool WriteRestoredFile(FILE * Pntr_FO, BYTE * Pntr_TempStor, BYTE * Pntr_TempStorMassive, char * Pntr_FileName, int Counter)
+bool WriteRestoredFile(FILE * Pntr_FO, BYTE * Pntr_TempStor, BYTE * Pntr_TempStorMassive, char * Pntr_FileName)
 {
-    FILE * Pntr_FW = fopen(Pntr_FileName, "w");
+    FILE * Pntr_FW = fopen(Pntr_FileName, "wb");
     if(Pntr_FW == NULL)
     {
         fclose(Pntr_FO);
@@ -122,12 +126,12 @@ bool WriteRestoredFile(FILE * Pntr_FO, BYTE * Pntr_TempStor, BYTE * Pntr_TempSto
         fwrite((Pntr_TempStorMassive + i), sizeof(BYTE), 1, Pntr_FW);
     }
 
-    while(fread(Pntr_TempStor, sizeof(BYTE), 1, Pntr_FO) != EOF)
+    while(fread(Pntr_TempStor, sizeof(BYTE), 1, Pntr_FO) == 1)
     {
         fwrite(Pntr_TempStor, sizeof(BYTE), 1 , Pntr_FW);
         if(* Pntr_TempStor == 0xFF)
         {
-            if(fread(Pntr_TempStor, sizeof(BYTE), 1, Pntr_FO) != EOF)
+            if(fread(Pntr_TempStor, sizeof(BYTE), 1, Pntr_FO) == 1)
             {
                 fwrite(Pntr_TempStor, sizeof(BYTE), 1 , Pntr_FW);
                 if(* Pntr_TempStor == 0xD9)
@@ -152,12 +156,12 @@ bool WriteRestoredFile(FILE * Pntr_FO, BYTE * Pntr_TempStor, BYTE * Pntr_TempSto
 
 void IncreaseFileNameCounter(char * Pntr_FileName, FILECOUNTER * Pntr_Union_FileCounter, int q1)
 {
-    (*(Pntr_Union_FileCounter+q1+QUANTITYDIGIT-1)).LetterNumber++;
-    for(int s = (q1 + QUANTITYDIGIT - 1); s > (q1 - 1); s--)
+    (*(Pntr_Union_FileCounter+QUANTITYDIGIT-1)).LetterNumber++;
+    for(int s = (QUANTITYDIGIT - 1); s >= 0; s--)
     {
         if((*(Pntr_Union_FileCounter+s)).LetterNumber > 57)
         {
-            if((Pntr_Union_FileCounter + s) == (Pntr_Union_FileCounter + q1))
+            if((Pntr_Union_FileCounter + s) == Pntr_Union_FileCounter)
             {
                 fprintf(stderr, "The file counter was full and zeroed.\n");
                 for(int x = 0; x < QUANTITYDIGIT; x++)
