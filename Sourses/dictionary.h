@@ -15,6 +15,7 @@
 // maximum length for a word
 // (e.g., pneumonoultramicroscopicsilicovolcanoconiosis)
 #define LENGTH 45
+#define QTYLETTER 27
 
 /**
  * Returns true if word is in dictionary else false.
