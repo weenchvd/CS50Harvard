@@ -26,6 +26,8 @@ typedef struct Node
     struct Node * down[QTYLETTER];
 } NODE;
 
+NODE * InitializeTrieDict(int n);
+
 /**
  * Returns true if word is in dictionary else false.
  */
@@ -40,12 +42,7 @@ bool check(const char* word)
  */
 bool load(const char* dictionary)
 {
-    NODE * ptr_str_TrieDictRoot = malloc(sizeof(NODE));
-    (*ptr_str_TrieDictRoot).is_word = false;
-    for(int i = 0; i < QTYLETTER; i++)
-    {
-        (*ptr_str_TrieDictRoot).down[i] = NULL;
-    }
+    NODE * ptr_str_TrieDictRoot = InitializeTrieDict(LENGTH + 1);
     NODE * ptr_str_TrieDictTemp = ptr_str_TrieDictRoot;
 
     FILE * ptr_DictOpen = fopen(dictionary, "r");
@@ -61,72 +58,43 @@ bool load(const char* dictionary)
      */
     BUFFER uni_Buffer;
     uni_Buffer.LetterNumber = 0;
-    int LetterIndex = 0;
+    int LetterIndex = -1;
     int LetterCounter = 0;
     unsigned int QtyWords = 0;
     while((uni_Buffer.LetterNumber = getc(ptr_DictOpen)) != EOF)
     {
         if(isalpha(uni_Buffer.Letter))
         {
-            if(LetterCounter >= LENGTH)
+            if(LetterCounter > 44)
             {
                 fprintf(stderr, "The word in the dictionary \"%s\" is longer than 45 characters\n", dictionary);
                 return false;
             }
-
             LetterIndex = uni_Buffer.LetterNumber - 97;
-            if((*ptr_str_TrieDictTemp).down[LetterIndex] == NULL)
-            {
-                NODE * ptr_str_TrieDictDown = malloc(sizeof(NODE));
-                (*ptr_str_TrieDictDown).is_word = false;
-                for(int x = 0; x < QTYLETTER; x++)
-                {
-                    (*ptr_str_TrieDictDown).down[x] = NULL;
-                }
-                (*ptr_str_TrieDictTemp).down[LetterIndex] = ptr_str_TrieDictDown;
-            }
-
             ptr_str_TrieDictTemp = (*ptr_str_TrieDictTemp).down[LetterIndex];
             LetterCounter++;
         }
         else if(uni_Buffer.LetterNumber == '\'')
         {
-            if(LetterCounter >= LENGTH)
+            if(LetterCounter > 44)
             {
                 fprintf(stderr, "The word in the dictionary \"%s\" is longer than 45 characters\n", dictionary);
                 return false;
             }
-
             LetterIndex = 26;
-            if((*ptr_str_TrieDictTemp).down[LetterIndex] == NULL)
-            {
-                NODE * ptr_str_TrieDictDown = malloc(sizeof(NODE));
-                (*ptr_str_TrieDictDown).is_word = false;
-                for(int x = 0; x < QTYLETTER; x++)
-                {
-                    (*ptr_str_TrieDictDown).down[x] = NULL;
-                }
-                (*ptr_str_TrieDictTemp).down[LetterIndex] = ptr_str_TrieDictDown;
-            }
-
             ptr_str_TrieDictTemp = (*ptr_str_TrieDictTemp).down[LetterIndex];
             LetterCounter++;
         }
-        else if(uni_Buffer.LetterNumber == '\n')
+        else if(uni_Buffer.LetterNumber == 0)
         {
             (*ptr_str_TrieDictTemp).is_word = true;
             ptr_str_TrieDictTemp = ptr_str_TrieDictRoot;
             LetterCounter = 0;
             QtyWords++;
         }
-        else
-        {
-            fprintf(stderr, "Invalid character in the dictionary \"%s\"\n", dictionary);
-            return false;
-        }
     }
     fclose(ptr_DictOpen);
-    printf("QtyWords = %u\n", QtyWords);
+    printf("QtyWords = %u", QtyWords);
     return true;
 }
 
@@ -146,4 +114,34 @@ bool unload(void)
 {
     // TODO
     return false;
+}
+
+NODE * InitializeTrieDict(int n)
+{
+    if(n < (LENGTH + 1) && n > 0)
+    {
+        NODE * ptr_str_TrieDictDown = malloc(sizeof(NODE));
+        n--;
+        (*ptr_str_TrieDictDown).is_word = false;
+        for(int a = 0; a < QTYLETTER; a++)
+        {
+            (*ptr_str_TrieDictDown).down[a] = InitializeTrieDict(n);
+        }
+        return ptr_str_TrieDictDown;
+    }
+    else if(n == (LENGTH + 1))
+    {
+        NODE * ptr_str_TrieDict = malloc(sizeof(NODE));
+        n--;
+        (*ptr_str_TrieDict).is_word = false;
+        for(int i = 0; i < QTYLETTER; i++)
+        {
+            (*ptr_str_TrieDict).down[i] = InitializeTrieDict(n);
+        }
+        return ptr_str_TrieDict;
+    }
+    else if(n == 0)
+    {
+        return NULL;
+    }
 }

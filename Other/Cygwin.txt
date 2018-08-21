@@ -1,0 +1,3 @@
+git config --global user.name "weenchvd"
+
+cd D:/_Code/CLionProjects/CS50Harvard/cmake-build-debug
