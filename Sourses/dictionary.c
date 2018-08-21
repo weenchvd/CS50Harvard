@@ -18,20 +18,43 @@ typedef union
 {
     int LetterNumber;
     char Letter;
-} BUFFER;
+} UNI_CHARBUFFER;
 
 typedef struct Node
 {
     bool is_word;
     struct Node * down[QTYLETTER];
-} NODE;
+} STR_NODE;
+
+STR_NODE * ptr_str_TrieDictRoot;
+UNI_CHARBUFFER uni_Buffer;
 
 /**
  * Returns true if word is in dictionary else false.
  */
 bool check(const char* word)
 {
-    // TODO
+    char * ptr_CheckWord = (char *) word;
+    int LetterCounter = 0;
+    for(int i = 0; i <= LENGTH; i++)
+    {
+        int c = (int) (*(ptr_CheckWord + i));
+        if(c > 64 && c < 91)
+        {
+            uni_Buffer.LetterNumber = (c + 32);
+            *(ptr_CheckWord + i) = uni_Buffer.Letter;
+        }
+        else if(c == '\0')
+        {
+            break;
+        }
+        LetterCounter++;
+    }
+
+    for(int j = 0; j < LetterCounter; j++)
+    {
+
+    }
     return false;
 }
 
@@ -40,13 +63,13 @@ bool check(const char* word)
  */
 bool load(const char* dictionary)
 {
-    NODE * ptr_str_TrieDictRoot = malloc(sizeof(NODE));
+    ptr_str_TrieDictRoot = malloc(sizeof(STR_NODE));
     (*ptr_str_TrieDictRoot).is_word = false;
     for(int i = 0; i < QTYLETTER; i++)
     {
         (*ptr_str_TrieDictRoot).down[i] = NULL;
     }
-    NODE * ptr_str_TrieDictTemp = ptr_str_TrieDictRoot;
+    STR_NODE * ptr_str_TrieDictTemp = ptr_str_TrieDictRoot;
 
     FILE * ptr_DictOpen = fopen(dictionary, "r");
     if(ptr_DictOpen == NULL)
@@ -59,11 +82,11 @@ bool load(const char* dictionary)
      * LetterIndex - номер буквы начиная с 0 и заканчивая 26, где 0 = "a", 1 = "b" и так
      * далее до 25 = "z", а 26 = "'" (апостроф)
      */
-    BUFFER uni_Buffer;
     uni_Buffer.LetterNumber = 0;
     int LetterIndex = 0;
     int LetterCounter = 0;
     unsigned int QtyWords = 0;
+
     while((uni_Buffer.LetterNumber = getc(ptr_DictOpen)) != EOF)
     {
         if(isalpha(uni_Buffer.Letter))
@@ -77,7 +100,7 @@ bool load(const char* dictionary)
             LetterIndex = uni_Buffer.LetterNumber - 97;
             if((*ptr_str_TrieDictTemp).down[LetterIndex] == NULL)
             {
-                NODE * ptr_str_TrieDictDown = malloc(sizeof(NODE));
+                STR_NODE * ptr_str_TrieDictDown = malloc(sizeof(STR_NODE));
                 (*ptr_str_TrieDictDown).is_word = false;
                 for(int x = 0; x < QTYLETTER; x++)
                 {
@@ -100,7 +123,7 @@ bool load(const char* dictionary)
             LetterIndex = 26;
             if((*ptr_str_TrieDictTemp).down[LetterIndex] == NULL)
             {
-                NODE * ptr_str_TrieDictDown = malloc(sizeof(NODE));
+                STR_NODE * ptr_str_TrieDictDown = malloc(sizeof(STR_NODE));
                 (*ptr_str_TrieDictDown).is_word = false;
                 for(int x = 0; x < QTYLETTER; x++)
                 {
@@ -125,6 +148,7 @@ bool load(const char* dictionary)
             return false;
         }
     }
+
     fclose(ptr_DictOpen);
     printf("QtyWords = %u\n", QtyWords);
     return true;

@@ -18,15 +18,15 @@ typedef union
 {
     int LetterNumber;
     char Letter;
-} BUFFER;
+} UNI_CHARBUFFER;
 
 typedef struct Node
 {
     bool is_word;
     struct Node * down[QTYLETTER];
-} NODE;
+} STR_NODE;
 
-NODE * InitializeTrieDict(int n);
+STR_NODE * InitializeTrieDict(int n);
 
 /**
  * Returns true if word is in dictionary else false.
@@ -42,8 +42,8 @@ bool check(const char* word)
  */
 bool load(const char* dictionary)
 {
-    NODE * ptr_str_TrieDictRoot = InitializeTrieDict(LENGTH + 1);
-    NODE * ptr_str_TrieDictTemp = ptr_str_TrieDictRoot;
+    STR_NODE * ptr_str_TrieDictRoot = InitializeTrieDict(LENGTH + 1);
+    STR_NODE * ptr_str_TrieDictTemp = ptr_str_TrieDictRoot;
 
     FILE * ptr_DictOpen = fopen(dictionary, "r");
     if(ptr_DictOpen == NULL)
@@ -56,7 +56,7 @@ bool load(const char* dictionary)
      * LetterIndex - номер буквы начиная с 0 и заканчивая 26, где 0 = "a", 1 = "b" и так
      * далее до 25 = "z", а 26 = "'" (апостроф)
      */
-    BUFFER uni_Buffer;
+    UNI_CHARBUFFER uni_Buffer;
     uni_Buffer.LetterNumber = 0;
     int LetterIndex = -1;
     int LetterCounter = 0;
@@ -116,11 +116,11 @@ bool unload(void)
     return false;
 }
 
-NODE * InitializeTrieDict(int n)
+STR_NODE * InitializeTrieDict(int n)
 {
     if(n < (LENGTH + 1) && n > 0)
     {
-        NODE * ptr_str_TrieDictDown = malloc(sizeof(NODE));
+        STR_NODE * ptr_str_TrieDictDown = malloc(sizeof(STR_NODE));
         n--;
         (*ptr_str_TrieDictDown).is_word = false;
         for(int a = 0; a < QTYLETTER; a++)
@@ -131,7 +131,7 @@ NODE * InitializeTrieDict(int n)
     }
     else if(n == (LENGTH + 1))
     {
-        NODE * ptr_str_TrieDict = malloc(sizeof(NODE));
+        STR_NODE * ptr_str_TrieDict = malloc(sizeof(STR_NODE));
         n--;
         (*ptr_str_TrieDict).is_word = false;
         for(int i = 0; i < QTYLETTER; i++)
