@@ -16,8 +16,8 @@
 
 typedef union
 {
-    int LetterNumber;
     char Letter;
+    int LetterNumber;
 } UNI_CHARBUFFER;
 
 typedef struct Node
@@ -38,20 +38,20 @@ bool check(const char* word)
     ptr_str_TrieDictTemp = ptr_str_TrieDictRoot;
     for(int i = 0; i <= LENGTH; i++)
     {
-        uni_Buffer.Letter = *(word + i);
+        uni_Buffer.LetterNumber = (int) *(word + i);
         if(uni_Buffer.LetterNumber > 64 && uni_Buffer.LetterNumber < 91)
         {
             uni_Buffer.LetterNumber += 32;
         }
-        else if(uni_Buffer.LetterNumber == '\0')
+        else if(uni_Buffer.Letter == '\0')
         {
             if((*ptr_str_TrieDictTemp).is_word == true) return true;
             else return false;
         }
-
-        if((*ptr_str_TrieDictTemp).down[uni_Buffer.LetterNumber] != NULL)
+        //TODO check "'"
+        if((*ptr_str_TrieDictTemp).down[uni_Buffer.LetterNumber - 97] != NULL)
         {
-            ptr_str_TrieDictTemp = (*ptr_str_TrieDictTemp).down[uni_Buffer.LetterNumber];
+            ptr_str_TrieDictTemp = (*ptr_str_TrieDictTemp).down[uni_Buffer.LetterNumber - 97];
         }
         else return false;
     }
