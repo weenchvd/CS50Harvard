@@ -43,12 +43,16 @@ bool check(const char* word)
         {
             uni_Buffer.LetterNumber += 32;
         }
+        else if(uni_Buffer.Letter == '\'')
+        {
+            uni_Buffer.LetterNumber += 84; //because (39 + 84) - 97 = 26 (is index "'" in the STR_NODE.down[index])
+        }
         else if(uni_Buffer.Letter == '\0')
         {
             if((*ptr_str_TrieDictTemp).is_word == true) return true;
             else return false;
         }
-        //TODO check "'"
+
         if((*ptr_str_TrieDictTemp).down[uni_Buffer.LetterNumber - 97] != NULL)
         {
             ptr_str_TrieDictTemp = (*ptr_str_TrieDictTemp).down[uni_Buffer.LetterNumber - 97];
