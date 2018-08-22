@@ -26,6 +26,8 @@ typedef struct Node
     struct Node * down[QTYLETTER];
 } STR_NODE;
 
+unsigned int WordCounter (STR_NODE *);
+
 STR_NODE * ptr_str_TrieDictRoot;
 STR_NODE * ptr_str_TrieDictTemp;
 UNI_CHARBUFFER uni_Buffer;
@@ -83,8 +85,8 @@ bool load(const char* dictionary)
     }
 
     /**
-     * LetterIndex - номер буквы начиная с 0 и заканчивая 26, где 0 = "a", 1 = "b" и так
-     * далее до 25 = "z", а 26 = "'" (апостроф)
+     * LetterIndex is the letter number from 0 to 26, where 0 = "a", 1 = "b" and so on
+     * to 25 = "z", and 26 = "'" (apostrophe)
      */
     uni_Buffer.LetterNumber = 0;
     int LetterIndex = 0;
@@ -127,7 +129,7 @@ bool load(const char* dictionary)
             LetterIndex = 26;
             if((*ptr_str_TrieDictTemp).down[LetterIndex] == NULL)
             {
-                STR_NODE * ptr_str_TrieDictDown = malloc(sizeof(STR_NODE)); //todo
+                STR_NODE * ptr_str_TrieDictDown = malloc(sizeof(STR_NODE)); //TODO ???
                 (*ptr_str_TrieDictDown).is_word = false;
                 for(int x = 0; x < QTYLETTER; x++)
                 {
@@ -154,7 +156,7 @@ bool load(const char* dictionary)
     }
 
     fclose(ptr_DictOpen);
-    printf("QtyWords = %u\n", QtyWords);
+    printf("Quantity of words when the dictionary is loaded: %u\n", QtyWords);
     return true;
 }
 
@@ -163,8 +165,9 @@ bool load(const char* dictionary)
  */
 unsigned int size(void)
 {
-    // TODO
-    return 0;
+    unsigned int QtyWords = 0;
+    QtyWords = WordCounter(ptr_str_TrieDictRoot);
+    return QtyWords;
 }
 
 /**
@@ -174,4 +177,18 @@ bool unload(void)
 {
     // TODO
     return false;
+}
+
+unsigned int WordCounter (STR_NODE * ptr_str_TrieDictDown)
+{
+    unsigned int QtyWords = 0;
+    for(int i = 0; i < QTYLETTER; i++)
+    {
+        if((*ptr_str_TrieDictDown).down[i] != NULL)
+        {
+            QtyWords += WordCounter((*ptr_str_TrieDictDown).down[i]);
+        }
+    }
+    if((*ptr_str_TrieDictDown).is_word == true) QtyWords++;
+    return QtyWords;
 }
