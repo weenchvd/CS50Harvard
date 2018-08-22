@@ -27,6 +27,7 @@ typedef struct Node
 } STR_NODE;
 
 unsigned int WordCounter (STR_NODE *);
+bool UnloadDict(STR_NODE *);
 
 STR_NODE * ptr_str_TrieDictRoot;
 STR_NODE * ptr_str_TrieDictTemp;
@@ -129,7 +130,7 @@ bool load(const char* dictionary)
             LetterIndex = 26;
             if((*ptr_str_TrieDictTemp).down[LetterIndex] == NULL)
             {
-                STR_NODE * ptr_str_TrieDictDown = malloc(sizeof(STR_NODE)); //TODO ???
+                STR_NODE * ptr_str_TrieDictDown = malloc(sizeof(STR_NODE));
                 (*ptr_str_TrieDictDown).is_word = false;
                 for(int x = 0; x < QTYLETTER; x++)
                 {
@@ -165,9 +166,7 @@ bool load(const char* dictionary)
  */
 unsigned int size(void)
 {
-    unsigned int QtyWords = 0;
-    QtyWords = WordCounter(ptr_str_TrieDictRoot);
-    return QtyWords;
+    return WordCounter(ptr_str_TrieDictRoot);
 }
 
 /**
@@ -175,8 +174,7 @@ unsigned int size(void)
  */
 bool unload(void)
 {
-    // TODO
-    return false;
+    return UnloadDict(ptr_str_TrieDictRoot);
 }
 
 unsigned int WordCounter (STR_NODE * ptr_str_TrieDictDown)
@@ -191,4 +189,20 @@ unsigned int WordCounter (STR_NODE * ptr_str_TrieDictDown)
     }
     if((*ptr_str_TrieDictDown).is_word == true) QtyWords++;
     return QtyWords;
+}
+
+bool UnloadDict(STR_NODE * ptr_str_TrieDictDown)
+{
+    for(int i = 0; i < QTYLETTER; i++)
+    {
+        if((*ptr_str_TrieDictDown).down[i] != NULL)
+        {
+            if(!UnloadDict((*ptr_str_TrieDictDown).down[i]))
+            {
+                return false;
+            }
+        }
+    }
+    free(ptr_str_TrieDictDown);
+    return true;
 }
