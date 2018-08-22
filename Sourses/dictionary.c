@@ -27,6 +27,7 @@ typedef struct Node
 } STR_NODE;
 
 STR_NODE * ptr_str_TrieDictRoot;
+STR_NODE * ptr_str_TrieDictTemp;
 UNI_CHARBUFFER uni_Buffer;
 
 /**
@@ -34,26 +35,25 @@ UNI_CHARBUFFER uni_Buffer;
  */
 bool check(const char* word)
 {
-    char * ptr_CheckWord = (char *) word;
-    int LetterCounter = 0;
+    ptr_str_TrieDictTemp = ptr_str_TrieDictRoot;
     for(int i = 0; i <= LENGTH; i++)
     {
-        int c = (int) (*(ptr_CheckWord + i));
-        if(c > 64 && c < 91)
+        uni_Buffer.Letter = *(word + i);
+        if(uni_Buffer.LetterNumber > 64 && uni_Buffer.LetterNumber < 91)
         {
-            uni_Buffer.LetterNumber = (c + 32);
-            *(ptr_CheckWord + i) = uni_Buffer.Letter;
+            uni_Buffer.LetterNumber += 32;
         }
-        else if(c == '\0')
+        else if(uni_Buffer.LetterNumber == '\0')
         {
-            break;
+            if((*ptr_str_TrieDictTemp).is_word == true) return true;
+            else return false;
         }
-        LetterCounter++;
-    }
 
-    for(int j = 0; j < LetterCounter; j++)
-    {
-
+        if((*ptr_str_TrieDictTemp).down[uni_Buffer.LetterNumber] != NULL)
+        {
+            ptr_str_TrieDictTemp = (*ptr_str_TrieDictTemp).down[uni_Buffer.LetterNumber];
+        }
+        else return false;
     }
     return false;
 }
@@ -69,7 +69,7 @@ bool load(const char* dictionary)
     {
         (*ptr_str_TrieDictRoot).down[i] = NULL;
     }
-    STR_NODE * ptr_str_TrieDictTemp = ptr_str_TrieDictRoot;
+    ptr_str_TrieDictTemp = ptr_str_TrieDictRoot;
 
     FILE * ptr_DictOpen = fopen(dictionary, "r");
     if(ptr_DictOpen == NULL)
@@ -123,7 +123,7 @@ bool load(const char* dictionary)
             LetterIndex = 26;
             if((*ptr_str_TrieDictTemp).down[LetterIndex] == NULL)
             {
-                STR_NODE * ptr_str_TrieDictDown = malloc(sizeof(STR_NODE));
+                STR_NODE * ptr_str_TrieDictDown = malloc(sizeof(STR_NODE)); //todo
                 (*ptr_str_TrieDictDown).is_word = false;
                 for(int x = 0; x < QTYLETTER; x++)
                 {
