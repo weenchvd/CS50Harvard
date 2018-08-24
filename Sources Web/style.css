@@ -1,0 +1,18 @@
+/* Селектор тега body – задает цвет фона*/
+body {
+	background-color: lightblue;
+}
+
+/* Селектор именованного блока, устанавливает цвет текста*/
+#pretty_color {
+	color: purple;
+}
+
+/* Селектор класса — задает шрифт */
+.pretty_font {
+  font-family: "Brush Script MT", cursive;
+}
+
+p {
+   color: white;
+}
