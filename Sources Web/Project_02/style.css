@@ -1,0 +1,73 @@
+body {
+    background-image: url("images/html-css.jpg");
+    width: 80%;
+}
+
+a {
+    color: #daa520;
+    font-size: 14px;
+}
+
+div {
+    color: #4b0082;
+}
+
+#a001 {
+    color: #1e90ff;
+    font-size: 14px;
+}
+
+#a000 {
+    color: #c71585;
+    font-size: 14px;
+}
+
+#css {
+    transition: 1s transform;
+    color: #FFF;
+    background-color: #daa520;
+    border: 2px solid #a52a2a;
+    border-radius: 5px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    padding: 2px;
+    opacity: 0.5;
+    box-shadow: 3px 3px 7px #000000;
+    width: 50%;
+    display: block;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+#css:hover {
+    transform: rotate(1deg);
+    opacity: 1;
+}
+
+.search_engine {
+    color: #a52a2a;
+}
+
+.online_shop {
+    color: #daa520;
+    background-color: #696969;
+    border: 1px solid #000;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding: 2px;
+}
+
+.world {
+    color: #FFF;
+    background-color: #4b0082;
+}
+
+.local {
+    color: #FFF;
+    background-color: #006400;
+}
+
+.online_shop:hover {
+    border: 1px solid #1e90ff;
+}
