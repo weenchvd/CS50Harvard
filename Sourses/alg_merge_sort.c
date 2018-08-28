@@ -1,49 +1,83 @@
 #include <stdio.h>
-#include <libcs50-8.1.0/cs50.h>
+#include <stdlib.h>
 
-int * MergeSort (int massive[], int lenth);
+int * MergeSort (int *, int);
 
-int main(int argc, string argv[])
+int main(int argc, char * argv[])
 {
-    int q = (argc - 1);
-    int massive[q];
-    int * pntr_sorted_massive;
-    for(int i = 0; i < q; i++)
+    int n = (argc - 1);
+    int massive[n];
+    int * ptr_UnsortedMassive = massive;
+    for(int i = 0; i < n; i++)
     {
         massive[i] = atoi(argv[i+1]);
     }
     printf("Unsorted list:\n");
-    for(int i = 0; i < q; i++)
+    for(int i = 0; i < n; i++)
     {
         printf("%d\t", massive[i]);
     }
-    pntr_sorted_massive = MergeSort(massive, q);
+    int * ptr_SortedMassive = MergeSort(ptr_UnsortedMassive, n);
     printf("\nSorted list:\n");
-    for(int i = 0; i < q; i++)
+    for(int i = 0; i < n; i++)
     {
-        printf("%d\t", massive[i]);
+        printf("%d\t", *(ptr_SortedMassive+i));
     }
-    /*if(MergeSort(massive, &massive[0], &massive[q-1]))
+}
+
+int * MergeSort (int * ptr_UnsortedMassive, int n)
+{
+    if(n == 1)
     {
-        printf("\nSorted list:\n");
-        for(int i = 0; i < q; i++) printf("%d\t", massive[i]);
-        return 0;
+        return ptr_UnsortedMassive;
     }
     else
     {
-        printf("\nSorting failed!\n");
-        return 1;
-    }*/
-}
+        int n_LeftHalf = 0, n_RightHalf = 0;
+        int SortedMassive[n];
+        int * ptr_SortedLeftHalf = NULL;
+        int * ptr_SortedRightHalf = NULL;
+        int * ptr_SortedMassive = SortedMassive;
+        if(n % 2)
+        {
+            n_LeftHalf = (n - 1) / 2;
+            n_RightHalf = n_LeftHalf + 1;
+            ptr_SortedLeftHalf = MergeSort(ptr_UnsortedMassive, n_LeftHalf);
+            ptr_SortedRightHalf = MergeSort((ptr_UnsortedMassive + (n - 1) / 2), n_RightHalf);
+        }
+        else
+        {
+            n_LeftHalf = n_RightHalf = n / 2;
+            ptr_SortedLeftHalf = MergeSort(ptr_UnsortedMassive, n_LeftHalf);
+            ptr_SortedRightHalf = MergeSort((ptr_UnsortedMassive + n / 2), n_RightHalf);
+        }
 
-int * MergeSort (int massive[], int lenth)
-{
-    if(lenth > 1)
-    {
-        int middle = 0, shift = 0, left_half_lenth = 0, rigth_half_lenth = 0;
-        int * left_half = 0, * right_half = 0;
-        ((lenth % 2) == 1) ? (middle = ((lenth - 1) / 2) + 1) : (middle = (lenth / 2) + 1, shift = 1);
-
+        for(int i = 0, x = 0, y = 0; i < n; i++)
+        {
+            if(x < n_LeftHalf && y < n_RightHalf)
+            {
+                if(*(ptr_SortedLeftHalf+x) < *(ptr_SortedRightHalf+y))
+                {
+                    SortedMassive[i] = *(ptr_SortedLeftHalf+x);
+                    x++;
+                }
+                else
+                {
+                    SortedMassive[i] = *(ptr_SortedRightHalf+y);
+                    y++;
+                }
+            }
+            else if (x < n_LeftHalf)
+            {
+                SortedMassive[i] = *(ptr_SortedLeftHalf+x);
+                x++;
+            }
+            else
+            {
+                SortedMassive[i] = *(ptr_SortedRightHalf+y);
+                y++;
+            }
+        }
+        return ptr_SortedMassive;
     }
-
 }
