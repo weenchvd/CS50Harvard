@@ -31,6 +31,7 @@
 #include <string.h>
 #include <strings.h>
 #include <unistd.h>
+#include <ctype.h>
 
 // types
 typedef char octet;
@@ -45,6 +46,9 @@ ssize_t parse(void);
 void reset(void);
 void start(short port, const char* path);
 void stop(void);
+bool CheckRequestLine(const char *);
+char * ExtractQueryText(const char *);
+char * ExtractPathText(const char *);
 
 // server's root
 char* root = NULL;
@@ -145,13 +149,43 @@ int main(int argc, char* argv[])
             // log request-line
             printf("%s", line);
 
-            // TODO: validate request-line
+            // validate request-line
+            if(!CheckRequestLine(line))
+            {
+                continue;
+            }
 
-            // TODO: extract query from request-target
-            char query[] = "TODO";
+            // extract query from request-target
+            const char * ptr_ExtractedQueryText = ExtractQueryText(line);
+            if(ptr_ExtractedQueryText == NULL)
+            {
+                error(500);
+                continue;
+            }
+            size_t LenthQueryText = strlen(ptr_ExtractedQueryText);
+            char query[LenthQueryText+1];
+            for(int i = 0; i < LenthQueryText; i++)
+            {
+                query[i] = *(ptr_ExtractedQueryText+i);
+            }
+            query[LenthQueryText] = '\0'; // TODO:?
+            // TODO: free(ptr_ExtractedQueryText) in reset()
 
-            // TODO: concatenate root and absolute-path
-            char path[] = "TODO";
+            // concatenate root and absolute-path
+            const char * ptr_ExtractedPathText = ExtractPathText(line);
+            if(ptr_ExtractedPathText == NULL)
+            {
+                error(500);
+                continue;
+            }
+            size_t LenthPathText = strlen(ptr_ExtractedPathText);
+            char path[LenthPathText+1];
+            for(int i = 0; i < LenthPathText; i++)
+            {
+                query[i] = *(ptr_ExtractedPathText+i);
+            }
+            path[LenthPathText] = '\0'; // TODO:?
+            // TODO: free(ptr_ExtractedPathText) in reset()
 
             // TODO: ensure path exists
             
@@ -439,7 +473,129 @@ void handler(int signal)
  */
 const char* lookup(const char* extension)
 {
-    // TODO
+    size_t LenthExt = strlen(extension);
+    char * ptr_LowExt = calloc(LenthExt+1, sizeof(char));
+    const char * ptr_ReturnableText;
+    for(int i = 0; i <= LenthExt; i++)
+    {
+        *(ptr_LowExt+i) = tolower(*(extension+i));
+    }
+
+    if(*ptr_LowExt == 'c')
+    {
+        if(*(ptr_LowExt+1) == 's')
+        {
+            if(*(ptr_LowExt+2) == 's')
+            {
+                if(*(ptr_LowExt+3) == '\0')
+                {
+                    free(ptr_LowExt);
+                    char ReturnableText[] = "text/css";
+                    ptr_ReturnableText = ReturnableText;
+                    return ptr_ReturnableText;
+                }
+            }
+        }
+    }
+
+    if(*ptr_LowExt == 'h')
+    {
+        if(*(ptr_LowExt+1) == 't')
+        {
+            if(*(ptr_LowExt+2) == 'm')
+            {
+                if(*(ptr_LowExt+3) == 'l')
+                {
+                    if(*(ptr_LowExt+4) == '\0')
+                    {
+                        free(ptr_LowExt);
+                        char ReturnableText[] = "text/html";
+                        ptr_ReturnableText = ReturnableText;
+                        return ptr_ReturnableText;
+                    }
+                }
+            }
+        }
+    }
+
+    if(*ptr_LowExt == 'g')
+    {
+        if(*(ptr_LowExt+1) == 'i')
+        {
+            if(*(ptr_LowExt+2) == 'f')
+            {
+                if(*(ptr_LowExt+3) == '\0')
+                {
+                    free(ptr_LowExt);
+                    char ReturnableText[] = "image/gif";
+                    ptr_ReturnableText = ReturnableText;
+                    return ptr_ReturnableText;
+                }
+            }
+        }
+    }
+
+    if(*ptr_LowExt == 'i')
+    {
+        if(*(ptr_LowExt+1) == 'c')
+        {
+            if(*(ptr_LowExt+2) == 'o')
+            {
+                if(*(ptr_LowExt+3) == '\0')
+                {
+                    free(ptr_LowExt);
+                    char ReturnableText[] = "image/x-icon";
+                    ptr_ReturnableText = ReturnableText;
+                    return ptr_ReturnableText;
+                }
+            }
+        }
+    }
+
+    if(*ptr_LowExt == 'j')
+    {
+        if(*(ptr_LowExt+1) == 'p')
+        {
+            if(*(ptr_LowExt+2) == 'g')
+            {
+                if(*(ptr_LowExt+3) == '\0')
+                {
+                    free(ptr_LowExt);
+                    char ReturnableText[] = "image/jpeg";
+                    ptr_ReturnableText = ReturnableText;
+                    return ptr_ReturnableText;
+                }
+            }
+        }
+        else if(*(ptr_LowExt+1) == 's')
+        {
+            if(*(ptr_LowExt+2) == '\0')
+            {
+                free(ptr_LowExt);
+                char ReturnableText[] = "text/javascript";
+                ptr_ReturnableText = ReturnableText;
+                return ptr_ReturnableText;
+            }
+        }
+    }
+
+    if(*ptr_LowExt == 'p')
+    {
+        if(*(ptr_LowExt+1) == 'n')
+        {
+            if(*(ptr_LowExt+2) == 'g')
+            {
+                if(*(ptr_LowExt+3) == '\0')
+                {
+                    free(ptr_LowExt);
+                    char ReturnableText[] = "image/png";
+                    ptr_ReturnableText = ReturnableText;
+                    return ptr_ReturnableText;
+                }
+            }
+        }
+    }
+
     return NULL;
 }
 
@@ -663,4 +819,43 @@ void stop(void)
         // failure
         exit(1);
     }
+}
+
+/**
+ * Validate request-line.
+ */
+bool CheckRequestLine(const char * RequestLine)
+{
+    char MassiveGET[] = "GET";
+    size_t LenthGET = strlen(MassiveGET);
+    for(int i = 0; i <= LenthGET; i++)
+    {
+        if(*(RequestLine+i) != MassiveGET[i])
+        {
+            error(405);
+            return false;
+        }
+    }
+
+
+
+
+
+    // TODO:
+}
+
+/**
+ * Extract query from request-target.
+ */
+char * ExtractQueryText(const char * RequestLine)
+{
+    // TODO:
+}
+
+/**
+ * Concatenate root and absolute-path.
+ */
+char * ExtractPathText(const char * RequestLine)
+{
+    // TODO:
 }
