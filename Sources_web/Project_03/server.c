@@ -163,10 +163,10 @@ int main(int argc, char* argv[])
                 continue;
             }
             size_t LenthQueryText = strlen(ptr_ExtractedQueryText);
-            char query[LenthQueryText+1];
+            char query[LenthQueryText + 1];
             for(int i = 0; i < LenthQueryText; i++)
             {
-                query[i] = *(ptr_ExtractedQueryText+i);
+                query[i] = *(ptr_ExtractedQueryText + i);
             }
             query[LenthQueryText] = '\0'; // TODO:?
             // TODO: free(ptr_ExtractedQueryText) in reset()
@@ -179,10 +179,10 @@ int main(int argc, char* argv[])
                 continue;
             }
             size_t LenthPathText = strlen(ptr_ExtractedPathText);
-            char path[LenthPathText+1];
+            char path[LenthPathText + 1];
             for(int i = 0; i < LenthPathText; i++)
             {
-                query[i] = *(ptr_ExtractedPathText+i);
+                query[i] = *(ptr_ExtractedPathText + i);
             }
             path[LenthPathText] = '\0'; // TODO:?
             // TODO: free(ptr_ExtractedPathText) in reset()
@@ -474,20 +474,20 @@ void handler(int signal)
 const char* lookup(const char* extension)
 {
     size_t LenthExt = strlen(extension);
-    char * ptr_LowExt = calloc(LenthExt+1, sizeof(char));
+    char * ptr_LowExt = calloc(LenthExt + 1, sizeof(char));
     const char * ptr_ReturnableText;
     for(int i = 0; i <= LenthExt; i++)
     {
-        *(ptr_LowExt+i) = tolower(*(extension+i));
+        *(ptr_LowExt + i) = tolower(*(extension + i));
     }
 
     if(*ptr_LowExt == 'c')
     {
-        if(*(ptr_LowExt+1) == 's')
+        if(*(ptr_LowExt + 1) == 's')
         {
-            if(*(ptr_LowExt+2) == 's')
+            if(*(ptr_LowExt + 2) == 's')
             {
-                if(*(ptr_LowExt+3) == '\0')
+                if(*(ptr_LowExt + 3) == '\0')
                 {
                     free(ptr_LowExt);
                     char ReturnableText[] = "text/css";
@@ -500,13 +500,13 @@ const char* lookup(const char* extension)
 
     if(*ptr_LowExt == 'h')
     {
-        if(*(ptr_LowExt+1) == 't')
+        if(*(ptr_LowExt + 1) == 't')
         {
-            if(*(ptr_LowExt+2) == 'm')
+            if(*(ptr_LowExt + 2) == 'm')
             {
-                if(*(ptr_LowExt+3) == 'l')
+                if(*(ptr_LowExt + 3) == 'l')
                 {
-                    if(*(ptr_LowExt+4) == '\0')
+                    if(*(ptr_LowExt + 4) == '\0')
                     {
                         free(ptr_LowExt);
                         char ReturnableText[] = "text/html";
@@ -520,11 +520,11 @@ const char* lookup(const char* extension)
 
     if(*ptr_LowExt == 'g')
     {
-        if(*(ptr_LowExt+1) == 'i')
+        if(*(ptr_LowExt + 1) == 'i')
         {
-            if(*(ptr_LowExt+2) == 'f')
+            if(*(ptr_LowExt + 2) == 'f')
             {
-                if(*(ptr_LowExt+3) == '\0')
+                if(*(ptr_LowExt + 3) == '\0')
                 {
                     free(ptr_LowExt);
                     char ReturnableText[] = "image/gif";
@@ -537,11 +537,11 @@ const char* lookup(const char* extension)
 
     if(*ptr_LowExt == 'i')
     {
-        if(*(ptr_LowExt+1) == 'c')
+        if(*(ptr_LowExt + 1) == 'c')
         {
-            if(*(ptr_LowExt+2) == 'o')
+            if(*(ptr_LowExt + 2) == 'o')
             {
-                if(*(ptr_LowExt+3) == '\0')
+                if(*(ptr_LowExt + 3) == '\0')
                 {
                     free(ptr_LowExt);
                     char ReturnableText[] = "image/x-icon";
@@ -554,11 +554,11 @@ const char* lookup(const char* extension)
 
     if(*ptr_LowExt == 'j')
     {
-        if(*(ptr_LowExt+1) == 'p')
+        if(*(ptr_LowExt + 1) == 'p')
         {
-            if(*(ptr_LowExt+2) == 'g')
+            if(*(ptr_LowExt + 2) == 'g')
             {
-                if(*(ptr_LowExt+3) == '\0')
+                if(*(ptr_LowExt + 3) == '\0')
                 {
                     free(ptr_LowExt);
                     char ReturnableText[] = "image/jpeg";
@@ -567,9 +567,9 @@ const char* lookup(const char* extension)
                 }
             }
         }
-        else if(*(ptr_LowExt+1) == 's')
+        else if(*(ptr_LowExt + 1) == 's')
         {
-            if(*(ptr_LowExt+2) == '\0')
+            if(*(ptr_LowExt + 2) == '\0')
             {
                 free(ptr_LowExt);
                 char ReturnableText[] = "text/javascript";
@@ -581,11 +581,11 @@ const char* lookup(const char* extension)
 
     if(*ptr_LowExt == 'p')
     {
-        if(*(ptr_LowExt+1) == 'n')
+        if(*(ptr_LowExt + 1) == 'n')
         {
-            if(*(ptr_LowExt+2) == 'g')
+            if(*(ptr_LowExt + 2) == 'g')
             {
-                if(*(ptr_LowExt+3) == '\0')
+                if(*(ptr_LowExt + 3) == '\0')
                 {
                     free(ptr_LowExt);
                     char ReturnableText[] = "image/png";
@@ -824,18 +824,41 @@ void stop(void)
 /**
  * Validate request-line.
  */
-bool CheckRequestLine(const char * RequestLine)
+bool CheckRequestLine(const char * ptr_RequestLine)
 {
-    char MassiveGET[] = "GET";
+    char * ptr_CurrentChar = (char *) ptr_RequestLine;
+    char MassiveGET[] = "GET ";
     size_t LenthGET = strlen(MassiveGET);
-    for(int i = 0; i <= LenthGET; i++)
+    for(int i = 0; i < LenthGET; i++)
     {
-        if(*(RequestLine+i) != MassiveGET[i])
+        if(*ptr_CurrentChar != MassiveGET[i])
         {
             error(405);
             return false;
         }
+        ptr_CurrentChar++;
     }
+
+    size_t LenthRequestTarget = 0;
+    while (true)
+    {
+        if(*(ptr_CurrentChar + LenthRequestTarget) == ' ')
+        {
+            break;
+        }
+        else if(*(ptr_CurrentChar + LenthRequestTarget) == '\0')
+        {
+            return false;
+        }
+        LenthRequestTarget++;
+    }
+    char * ptr_RequestTarget = calloc(LenthRequestTarget + 1, sizeof(char));
+    if(ptr_RequestTarget == NULL)
+    {
+        return false;
+    }
+    strncpy(ptr_RequestTarget, ptr_CurrentChar, LenthRequestTarget);
+    *(ptr_RequestTarget + LenthRequestTarget + 1) = '\0'; // TODO ?
 
 
 
@@ -847,7 +870,7 @@ bool CheckRequestLine(const char * RequestLine)
 /**
  * Extract query from request-target.
  */
-char * ExtractQueryText(const char * RequestLine)
+char * ExtractQueryText(const char * ptr_RequestLine)
 {
     // TODO:
 }
@@ -855,7 +878,7 @@ char * ExtractQueryText(const char * RequestLine)
 /**
  * Concatenate root and absolute-path.
  */
-char * ExtractPathText(const char * RequestLine)
+char * ExtractPathText(const char * ptr_RequestLine)
 {
     // TODO:
 }
