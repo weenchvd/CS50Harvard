@@ -47,8 +47,6 @@ void reset(void);
 void start(short port, const char* path);
 void stop(void);
 bool CheckRequestLine(const char *);
-char * ExtractQueryText(const char *);
-char * ExtractPathText(const char *);
 
 // server's root
 char* root = NULL;
@@ -64,6 +62,10 @@ FILE* file = NULL;
 
 // buffer for response-body
 octet* body = NULL;
+
+char * ptr_ExtractedQuery = NULL;
+char * ptr_ExtractedPath = NULL;
+char * ptr_ExtractedExtension = NULL;
 
 int main(int argc, char* argv[])
 {
@@ -149,43 +151,51 @@ int main(int argc, char* argv[])
             // log request-line
             printf("%s", line);
 
-            // validate request-line
+            // validate request-line and get query, path, extension
             if(!CheckRequestLine(line))
             {
+                error(400);
                 continue;
             }
 
-            // extract query from request-target
-            const char * ptr_ExtractedQueryText = ExtractQueryText(line);
-            if(ptr_ExtractedQueryText == NULL)
+            // extract query from request-target // TODO: free(ptr_ExtractedQuery) in reset()
+            size_t LenthQuery = strlen(ptr_ExtractedQuery);
+            if(LenthQuery == 0)
             {
-                error(500);
-                continue;
+                char query[1];
+                query[0] = '\0';
             }
-            size_t LenthQueryText = strlen(ptr_ExtractedQueryText);
-            char query[LenthQueryText + 1];
-            for(int i = 0; i < LenthQueryText; i++)
+            else if(LenthQuery > 0)
             {
-                query[i] = *(ptr_ExtractedQueryText + i);
+                char query[LenthQuery+1];
+                for(size_t i = 0; i < LenthQuery; i++)
+                {
+                    query[i] = *(ptr_ExtractedQuery + i);
+                }
+                query[LenthQuery] = '\0';
             }
-            query[LenthQueryText] = '\0'; // TODO:?
-            // TODO: free(ptr_ExtractedQueryText) in reset()
 
-            // concatenate root and absolute-path
-            const char * ptr_ExtractedPathText = ExtractPathText(line);
-            if(ptr_ExtractedPathText == NULL)
+
+            // concatenate root and absolute-path // TODO: free(ptr_AbsolutePath) & free(ptr_ExtractedPath) in reset()
+            size_t LenthPath = strlen(ptr_ExtractedPath);
+            char path[LenthPath + 1];
+            for(size_t i = 0; i < LenthPath; i++)
             {
-                error(500);
-                continue;
+                path[i] = *(ptr_ExtractedPath + i);
             }
-            size_t LenthPathText = strlen(ptr_ExtractedPathText);
-            char path[LenthPathText + 1];
-            for(int i = 0; i < LenthPathText; i++)
-            {
-                query[i] = *(ptr_ExtractedPathText + i);
-            }
-            path[LenthPathText] = '\0'; // TODO:?
-            // TODO: free(ptr_ExtractedPathText) in reset()
+            path[LenthPath] = '\0';
+
+
+
+
+
+
+
+
+
+
+
+
 
             // TODO: ensure path exists
             
@@ -822,25 +832,79 @@ void stop(void)
 }
 
 /**
- * Validate request-line.
+ * Validate request-line and get query, path, extension.
  */
 bool CheckRequestLine(const char * ptr_RequestLine)
 {
-    char * ptr_CurrentChar = (char *) ptr_RequestLine;
-    char MassiveGET[] = "GET ";
-    size_t LenthGET = strlen(MassiveGET);
-    for(int i = 0; i < LenthGET; i++)
+    /** check quantity SPACES int RequestLine */
+    size_t LenthRequestLine = 0;
+    size_t SpaceCounter = 0;
+    while(true)
     {
-        if(*ptr_CurrentChar != MassiveGET[i])
+        if(*(ptr_RequestLine + LenthRequestLine) == ' ')
+        {
+            SpaceCounter++;
+        }
+        else if(*(ptr_RequestLine + LenthRequestLine) == '\0')
+        {
+            break;
+        }
+        LenthRequestLine++;
+    }
+    if(SpaceCounter != 2)
+    {
+        return false;
+    }
+
+
+    char * ptr_CurrentChar = (char *) ptr_RequestLine;
+
+    /** check METHOD token */
+    size_t LenthMethod = 0;
+    while(true)
+    {
+        if(*(ptr_CurrentChar + LenthMethod) == ' ')
+        {
+            break;
+        }
+        else if(*(ptr_CurrentChar + LenthMethod) == '\0')
+        {
+            return false;
+        }
+        LenthMethod++;
+    }
+
+    char * ptr_Method = calloc(LenthMethod + 1, sizeof(char));
+    if(ptr_Method == NULL)
+    {
+        error(500);
+        return false;
+    }
+    strncpy(ptr_Method, ptr_CurrentChar, LenthMethod);
+    *(ptr_Method + LenthMethod) = '\0';
+
+    char MassiveGET[] = "GET";
+    size_t LenthMassiveGET = strlen(MassiveGET);
+    if(LenthMethod != LenthMassiveGET)
+    {
+        error(405);
+        return false;
+    }
+    for(int i = 0; i < LenthMassiveGET; i++)
+    {
+        if(*(ptr_Method + i) != MassiveGET[i])
         {
             error(405);
             return false;
         }
-        ptr_CurrentChar++;
     }
+    free(ptr_Method);
 
+    ptr_CurrentChar = ptr_CurrentChar + LenthMethod + 1;
+
+    /** check REQUEST-TARGET token */
     size_t LenthRequestTarget = 0;
-    while (true)
+    while(true)
     {
         if(*(ptr_CurrentChar + LenthRequestTarget) == ' ')
         {
@@ -852,33 +916,214 @@ bool CheckRequestLine(const char * ptr_RequestLine)
         }
         LenthRequestTarget++;
     }
+
     char * ptr_RequestTarget = calloc(LenthRequestTarget + 1, sizeof(char));
     if(ptr_RequestTarget == NULL)
     {
+        error(500);
         return false;
     }
     strncpy(ptr_RequestTarget, ptr_CurrentChar, LenthRequestTarget);
-    *(ptr_RequestTarget + LenthRequestTarget + 1) = '\0'; // TODO ?
+    *(ptr_RequestTarget + LenthRequestTarget) = '\0';
 
+    if(*ptr_RequestTarget != '/')
+    {
+        error(501);
+        return false;
+    }
 
+    bool isDot = false;
+    bool isQuestionMark = false;
+    size_t LocationDot = 0;
+    size_t LocationQuestionMark = 0;
+    for(size_t i = 0; i < LenthRequestTarget; i++)
+    {
+        if(*(ptr_RequestTarget + i) == '"')
+        {
+            error(400);
+            return false;
+        }
+        else if(*(ptr_RequestTarget + i) == '.')
+        {
+            isDot = true;
+            LocationDot = i;
+        }
+        else if(*(ptr_RequestTarget + i) == '?')
+        {
+            isQuestionMark = true;
+            LocationQuestionMark = i;
+        }
+    }
+    if(!isDot)
+    {
+        error(501);
+        return false;
+    }
 
+    /** extract EXTENSION from request-target */
+    char * ptr_BeginExtension = NULL;
+    ptr_BeginExtension = ptr_RequestTarget + LocationDot + 1;
+    if(ptr_BeginExtension == NULL)
+    {
+        error(500);
+        return false;
+    }
+    size_t LenthExtension = 0;
+    while(true)
+    {
+        if(*(ptr_BeginExtension + LenthExtension) == ' ')
+        {
+            if(LenthExtension == 0)
+            {
+                error(501);
+                return false;
+            }
+            break;
+        }
+        else if(*(ptr_BeginExtension + LenthRequestTarget) == '\0')
+        {
+            return false;
+        }
+        LenthExtension++;
+    }
 
+    ptr_ExtractedExtension = calloc(LenthExtension + 1, sizeof(char));
+    if(ptr_ExtractedExtension == NULL)
+    {
+        error(500);
+        return false;
+    }
+    strncpy(ptr_ExtractedExtension, ptr_BeginExtension, LenthExtension);
+    *(ptr_ExtractedExtension + LenthExtension) = '\0';
 
-    // TODO:
-}
+    /** extract PATH from request-target */
+    char * ptr_BeginPath = NULL;
+    ptr_BeginPath = ptr_RequestTarget + LenthMethod + 1;
+    if(ptr_BeginPath == NULL)
+    {
+        error(500);
+        return false;
+    }
+    size_t LenthPath = 0;
+    while(true)
+    {
+        if((*(ptr_BeginPath + LenthPath) == ' ') || (*(ptr_BeginPath + LenthPath) == '?'))
+        {
+            break;
+        }
+        else if(*(ptr_BeginPath + LenthPath) == '\0')
+        {
+            return false;
+        }
+        LenthPath++;
+    }
 
-/**
- * Extract query from request-target.
- */
-char * ExtractQueryText(const char * ptr_RequestLine)
-{
-    // TODO:
-}
+    ptr_ExtractedPath = calloc(LenthPath + 1, sizeof(char));
+    if(ptr_ExtractedPath == NULL)
+    {
+        error(500);
+        return false;
+    }
+    strncpy(ptr_ExtractedPath, ptr_BeginPath, LenthPath);
+    *(ptr_ExtractedPath + LenthPath) = '\0';
 
-/**
- * Concatenate root and absolute-path.
- */
-char * ExtractPathText(const char * ptr_RequestLine)
-{
-    // TODO:
+    /** extract QUERY from request-target */
+    if(isQuestionMark)
+    {
+        char * ptr_BeginQuery = NULL;
+        ptr_BeginQuery = ptr_RequestTarget + LocationQuestionMark + 1;
+        if(ptr_BeginQuery == NULL)
+        {
+            error(500);
+            return false;
+        }
+        size_t LenthQuery = 0;
+        while(true)
+        {
+            if(*(ptr_BeginQuery + LenthQuery) == ' ')
+            {
+                if(LenthQuery == 0)
+                {
+                    ptr_ExtractedQuery = malloc(sizeof(char));
+                    if(ptr_ExtractedQuery == NULL)
+                    {
+                        error(500);
+                        return false;
+                    }
+                    *ptr_ExtractedQuery = '\0';
+                }
+                break;
+            }
+            else if(*(ptr_BeginQuery + LenthQuery) == '\0')
+            {
+                return false;
+            }
+        }
+
+        ptr_ExtractedQuery = calloc(LenthQuery + 1, sizeof(char));
+        if(ptr_ExtractedQuery == NULL)
+        {
+            error(500);
+            return false;
+        }
+        strncpy(ptr_ExtractedQuery, ptr_BeginQuery, LenthQuery);
+        *(ptr_ExtractedQuery + LenthQuery) = '\0';
+    }
+    else
+    {
+        ptr_ExtractedQuery = malloc(sizeof(char));
+        if(ptr_ExtractedQuery == NULL)
+        {
+            error(500);
+            return false;
+        }
+        *ptr_ExtractedQuery = '\0';
+    }
+    free(ptr_RequestTarget);
+
+    ptr_CurrentChar = ptr_CurrentChar + LenthRequestTarget + 1;
+
+    /** check HTTP-VERSION token */
+    size_t LenthHTTPVersion = 0;
+    while(true)
+    {
+        if(*(ptr_CurrentChar + LenthHTTPVersion) == '\r')
+        {
+            if(*(ptr_CurrentChar + LenthHTTPVersion + 1) == '\n')
+            {
+                break;
+            }
+        }
+        else if(*(ptr_CurrentChar + LenthHTTPVersion) == '\0')
+        {
+            return false;
+        }
+        LenthHTTPVersion++;
+    }
+
+    char * ptr_HTTPVersion = calloc(LenthHTTPVersion + 1, sizeof(char));
+    if(ptr_HTTPVersion == NULL)
+    {
+        error(500);
+        return false;
+    }
+    strncpy(ptr_HTTPVersion, ptr_CurrentChar, LenthHTTPVersion);
+    *(ptr_HTTPVersion + LenthHTTPVersion) = '\0';
+
+    char MassiveHTTPVersion[] = "HTTP/1.1";
+    size_t LenthMassiveHTTPVersion = strlen(MassiveHTTPVersion);
+    if(LenthHTTPVersion != LenthMassiveHTTPVersion)
+    {
+        error(505);
+        return false;
+    }
+    for(int i = 0; i < LenthMassiveHTTPVersion; i++)
+    {
+        if(*(ptr_HTTPVersion + i) != MassiveHTTPVersion[i])
+        {
+            error(505);
+            return false;
+        }
+    }
+    free(ptr_HTTPVersion);
 }
