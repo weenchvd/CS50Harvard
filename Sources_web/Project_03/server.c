@@ -158,25 +158,19 @@ int main(int argc, char* argv[])
                 continue;
             }
 
-            // extract query from request-target // TODO: free(ptr_ExtractedQuery) in reset()
+            // extract query from request-target
             size_t LenthQuery = strlen(ptr_ExtractedQuery);
-            if(LenthQuery == 0)
+            char query[LenthQuery+1];
+            if(LenthQuery > 0)
             {
-                char query[1];
-                query[0] = '\0';
-            }
-            else if(LenthQuery > 0)
-            {
-                char query[LenthQuery+1];
                 for(size_t i = 0; i < LenthQuery; i++)
                 {
                     query[i] = *(ptr_ExtractedQuery + i);
                 }
-                query[LenthQuery] = '\0';
             }
+            query[LenthQuery] = '\0';
 
-
-            // concatenate root and absolute-path // TODO: free(ptr_AbsolutePath) & free(ptr_ExtractedPath) in reset()
+            // concatenate root and absolute-path
             size_t LenthPath = strlen(ptr_ExtractedPath);
             char path[LenthPath + 1];
             for(size_t i = 0; i < LenthPath; i++)
@@ -185,24 +179,31 @@ int main(int argc, char* argv[])
             }
             path[LenthPath] = '\0';
 
+            // ensure path exists and ensure path is readable
+            FILE * ptr_FO = fopen(ptr_ExtractedPath, "r");
+            if(ptr_FO == NULL)
+            {
+                error(404);
+                continue;
+            }
+            else
+            {
+                if(fgetc(ptr_FO) == EOF)
+                {
+                    error(404);
+                    continue;
+                }
+                fclose(ptr_FO);
+            }
 
-
-
-
-
-
-
-
-
-
-
-
-            // TODO: ensure path exists
-            
-            // TODO: ensure path is readable
- 
-            // TODO: extract path's extension
-            char extension[] = "TODO";
+            // extract path's extension
+            size_t LenthExtension = strlen(ptr_ExtractedExtension);
+            char extension[LenthExtension + 1];
+            for(size_t i = 0; i < LenthExtension; i++)
+            {
+                extension[i] = *(ptr_ExtractedExtension + i);
+            }
+            extension[LenthExtension] = '\0';
 
             // dynamic content
             if (strcasecmp("php", extension) == 0)
@@ -282,7 +283,23 @@ int main(int argc, char* argv[])
                     continue;
                 }
 
-                // TODO: respond to client
+                // respond to client
+                if (dprintf(cfd, "HTTP/1.1 200 OK\r\n") < 0)
+                {
+                    continue;
+                }
+                if (dprintf(cfd, "Connection: close\r\n") < 0)
+                {
+                    continue;
+                }
+                if (dprintf(cfd, "Content-Length: %i\r\n", length) < 0)
+                {
+                    continue;
+                }
+                if (write(cfd, body, length) == -1)
+                {
+                    continue;
+                }
             }
             
             // announce OK
@@ -483,130 +500,38 @@ void handler(int signal)
  */
 const char* lookup(const char* extension)
 {
-    size_t LenthExt = strlen(extension);
-    char * ptr_LowExt = calloc(LenthExt + 1, sizeof(char));
-    const char * ptr_ReturnableText;
-    for(int i = 0; i <= LenthExt; i++)
+    if(strcasecmp(extension, "css") == 0)
     {
-        *(ptr_LowExt + i) = tolower(*(extension + i));
+        return "text/css";
     }
-
-    if(*ptr_LowExt == 'c')
+    else if(strcasecmp(extension, "html") == 0)
     {
-        if(*(ptr_LowExt + 1) == 's')
-        {
-            if(*(ptr_LowExt + 2) == 's')
-            {
-                if(*(ptr_LowExt + 3) == '\0')
-                {
-                    free(ptr_LowExt);
-                    char ReturnableText[] = "text/css";
-                    ptr_ReturnableText = ReturnableText;
-                    return ptr_ReturnableText;
-                }
-            }
-        }
+        return "text/html";
     }
-
-    if(*ptr_LowExt == 'h')
+    else if(strcasecmp(extension, "gif") == 0)
     {
-        if(*(ptr_LowExt + 1) == 't')
-        {
-            if(*(ptr_LowExt + 2) == 'm')
-            {
-                if(*(ptr_LowExt + 3) == 'l')
-                {
-                    if(*(ptr_LowExt + 4) == '\0')
-                    {
-                        free(ptr_LowExt);
-                        char ReturnableText[] = "text/html";
-                        ptr_ReturnableText = ReturnableText;
-                        return ptr_ReturnableText;
-                    }
-                }
-            }
-        }
+        return "image/gif";
     }
-
-    if(*ptr_LowExt == 'g')
+    else if(strcasecmp(extension, "ico") == 0)
     {
-        if(*(ptr_LowExt + 1) == 'i')
-        {
-            if(*(ptr_LowExt + 2) == 'f')
-            {
-                if(*(ptr_LowExt + 3) == '\0')
-                {
-                    free(ptr_LowExt);
-                    char ReturnableText[] = "image/gif";
-                    ptr_ReturnableText = ReturnableText;
-                    return ptr_ReturnableText;
-                }
-            }
-        }
+        return "image/x-icon";
     }
-
-    if(*ptr_LowExt == 'i')
+    else if(strcasecmp(extension, "jpg") == 0)
     {
-        if(*(ptr_LowExt + 1) == 'c')
-        {
-            if(*(ptr_LowExt + 2) == 'o')
-            {
-                if(*(ptr_LowExt + 3) == '\0')
-                {
-                    free(ptr_LowExt);
-                    char ReturnableText[] = "image/x-icon";
-                    ptr_ReturnableText = ReturnableText;
-                    return ptr_ReturnableText;
-                }
-            }
-        }
+        return "image/jpeg";
     }
-
-    if(*ptr_LowExt == 'j')
+    else if(strcasecmp(extension, "js") == 0)
     {
-        if(*(ptr_LowExt + 1) == 'p')
-        {
-            if(*(ptr_LowExt + 2) == 'g')
-            {
-                if(*(ptr_LowExt + 3) == '\0')
-                {
-                    free(ptr_LowExt);
-                    char ReturnableText[] = "image/jpeg";
-                    ptr_ReturnableText = ReturnableText;
-                    return ptr_ReturnableText;
-                }
-            }
-        }
-        else if(*(ptr_LowExt + 1) == 's')
-        {
-            if(*(ptr_LowExt + 2) == '\0')
-            {
-                free(ptr_LowExt);
-                char ReturnableText[] = "text/javascript";
-                ptr_ReturnableText = ReturnableText;
-                return ptr_ReturnableText;
-            }
-        }
+        return "text/javascript";
     }
-
-    if(*ptr_LowExt == 'p')
+    else if(strcasecmp(extension, "png") == 0)
     {
-        if(*(ptr_LowExt + 1) == 'n')
-        {
-            if(*(ptr_LowExt + 2) == 'g')
-            {
-                if(*(ptr_LowExt + 3) == '\0')
-                {
-                    free(ptr_LowExt);
-                    char ReturnableText[] = "image/png";
-                    ptr_ReturnableText = ReturnableText;
-                    return ptr_ReturnableText;
-                }
-            }
-        }
+        return "image/png";
     }
-
-    return NULL;
+    else
+    {
+        return NULL;
+    }
 }
 
 /**
@@ -718,6 +643,27 @@ void reset(void)
     {
         close(cfd);
         cfd = -1;
+    }
+
+    // free ptr_ExtractedQuery
+    if(ptr_ExtractedQuery != NULL)
+    {
+        free(ptr_ExtractedQuery);
+        ptr_ExtractedQuery = NULL;
+    }
+
+    // free ptr_ExtractedPath
+    if(ptr_ExtractedPath != NULL)
+    {
+        free(ptr_ExtractedPath);
+        ptr_ExtractedPath = NULL;
+    }
+
+    // free ptr_ExtractedExtension
+    if(ptr_ExtractedExtension != NULL)
+    {
+        free(ptr_ExtractedExtension);
+        ptr_ExtractedExtension = NULL;
     }
 }
 
@@ -1042,32 +988,35 @@ bool CheckRequestLine(const char * ptr_RequestLine)
         {
             if(*(ptr_BeginQuery + LenthQuery) == ' ')
             {
-                if(LenthQuery == 0)
-                {
-                    ptr_ExtractedQuery = malloc(sizeof(char));
-                    if(ptr_ExtractedQuery == NULL)
-                    {
-                        error(500);
-                        return false;
-                    }
-                    *ptr_ExtractedQuery = '\0';
-                }
                 break;
             }
             else if(*(ptr_BeginQuery + LenthQuery) == '\0')
             {
                 return false;
             }
+            LenthQuery++;
         }
-
-        ptr_ExtractedQuery = calloc(LenthQuery + 1, sizeof(char));
-        if(ptr_ExtractedQuery == NULL)
+        if(LenthQuery == 0)
         {
-            error(500);
-            return false;
+            ptr_ExtractedQuery = malloc(sizeof(char));
+            if(ptr_ExtractedQuery == NULL)
+            {
+                error(500);
+                return false;
+            }
+            *ptr_ExtractedQuery = '\0';
         }
-        strncpy(ptr_ExtractedQuery, ptr_BeginQuery, LenthQuery);
-        *(ptr_ExtractedQuery + LenthQuery) = '\0';
+        else if(LenthQuery > 0)
+        {
+            ptr_ExtractedQuery = calloc(LenthQuery + 1, sizeof(char));
+            if(ptr_ExtractedQuery == NULL)
+            {
+                error(500);
+                return false;
+            }
+            strncpy(ptr_ExtractedQuery, ptr_BeginQuery, LenthQuery);
+            *(ptr_ExtractedQuery + LenthQuery) = '\0';
+        }
     }
     else
     {
